@@ -1,4 +1,3 @@
-# metode run() som kjører programmet, metode for å laste in dataset
 import os
 import zipfile
 import tqdm
@@ -18,7 +17,7 @@ def data_loader(dataset_numb, image_size, batch_size):
     extract_path = f'{ds_root}/celeba-dataset'
 
     if dataset_numb == 1:
-        # number of color channels, since its back and white, 1 is need, and not 3 (RGB)
+        # number of color channels, since its grey scaling, 1 is need, and not 3 (RGB)
         nc = 1
         # needed since the dataset is differently put than the others
         transform = transforms.Compose([transforms.Resize(image_size), transforms.CenterCrop(image_size),
@@ -28,7 +27,7 @@ def data_loader(dataset_numb, image_size, batch_size):
         print_start_img(dataloader)
         return dataloader, nc
 
-    # rest of datasets have 3 channels
+    # rest of datasets have 3 color channels
     nc = 3
     transform = transforms.Compose([transforms.Resize(image_size), transforms.CenterCrop(image_size),
                                     transforms.ToTensor(),
@@ -61,8 +60,6 @@ def data_loader(dataset_numb, image_size, batch_size):
 
     # Create the dataloader
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
-
-    # Plot some training images
     print_start_img(dataloader)
 
     return dataloader, nc
@@ -77,7 +74,7 @@ def run(dataset_numb, img_size, batch_size):
     lr = 0.0002
 
     batch_size = batch_size
-    dataloader, nc = data_loader(dataset_numb, img_size, batch_size)
+    dataloader, channel_number = data_loader(dataset_numb, img_size, batch_size)
 
     # further implementation needed
 
