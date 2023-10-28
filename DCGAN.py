@@ -1,6 +1,17 @@
 # Selve DCGAN klassen
 import torch
 import random
+import torch.nn as nn
+
+
+# based in the paper by Alec Radford the, the team concluded that the weight should be distributed in this maner
+def weights(m):
+    classname = m.__class__.__name__
+    if classname.find('Conv') != -1:
+        nn.init.normal_(m.weight.data, 0.0, 0.02)
+    elif classname.find('BatchNorm') != -1:
+        nn.init.normal_(m.weight.data, 1.0, 0.02)
+        nn.init.constant_(m.bias.data, 0)
 
 
 class DCGAN:
@@ -26,7 +37,4 @@ class DCGAN:
         return 0
 
     def load_model(self):
-        return 0
-
-    def weights(self):
         return 0

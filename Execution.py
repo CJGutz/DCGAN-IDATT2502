@@ -3,8 +3,10 @@ import os
 import zipfile
 import tqdm
 import torch
+import torchvision
 import torchvision.datasets as dset
 import torchvision.transforms as transforms
+from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 # Define Visualization class (in Visualization.py)
@@ -16,6 +18,23 @@ def data_loader(dataset_numb, image_size, batch_size):
     extract_path = f'{ds_root}/celeba-dataset'
 
     if dataset_numb == 1:
+        # number of color channels, since its back and white, 1 is need, and not 3 (RGB)
+        nc = 1
+        # needed since the dataset is differently put than the others
+        transform = transforms.Compose([transforms.Resize(image_size), transforms.CenterCrop(image_size),
+                                        transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
+        dataset = torchvision.datasets.MNIST(root=ds_root, train=True, download=True, transform=transform)
+        dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
+        print_start_img(dataloader)
+        return dataloader, nc
+
+    # rest of datasets have 3 channels
+    nc = 3
+    transform = transforms.Compose([transforms.Resize(image_size), transforms.CenterCrop(image_size),
+                                    transforms.ToTensor(),
+                                    transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)), ])
+
+    if dataset_numb == 2:
         # If dateset isn't in the directory its downloaded from the zipfile
         if not os.path.isdir(extract_path):
             # Specify the path to the manually uploaded datasets zip file
@@ -35,15 +54,7 @@ def data_loader(dataset_numb, image_size, batch_size):
             pbar.close()
 
         dataset = dset.ImageFolder(root=extract_path,
-                                   transform=transforms.Compose([
-                                       transforms.Resize(image_size),
-                                       transforms.CenterCrop(image_size),
-                                       transforms.ToTensor(),
-                                       transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
-                                   ]))
-
-    elif dataset_numb == 2:
-        dataset = 2
+                                   transform=transform)
 
     elif dataset_numb == 3:
         dataset = 3
@@ -54,7 +65,7 @@ def data_loader(dataset_numb, image_size, batch_size):
     # Plot some training images
     print_start_img(dataloader)
 
-    return dataloader
+    return dataloader, nc
 
 
 def run(dataset_numb, img_size, batch_size):
@@ -65,11 +76,8 @@ def run(dataset_numb, img_size, batch_size):
     beta1 = 0.5
     lr = 0.0002
 
-    # flyttes til dataloader-metoden etter hvert
-    numb_channels = 3
-
     batch_size = batch_size
-    dataloader = data_loader(dataset_numb, img_size, batch_size)
+    dataloader, nc = data_loader(dataset_numb, img_size, batch_size)
 
     # further implementation needed
 
