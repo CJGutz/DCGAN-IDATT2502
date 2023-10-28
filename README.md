@@ -10,4 +10,4 @@ In this project we have developed a **Deep Convolutional Generative Adversarial 
 
  ```console
     pip install -r requirements.txt
-    ```
+ ```
