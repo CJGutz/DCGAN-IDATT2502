@@ -7,4 +7,7 @@ This is a project in the course *IDATT2502 - Applied Machine Learning* at the No
 In this project we have developed a **Deep Convolutional Generative Adversarial Network**.
 
 #How to
-pip install -r Requirements.txt
+
+ ```console
+    pip install -r requirements.txt
+    ```
