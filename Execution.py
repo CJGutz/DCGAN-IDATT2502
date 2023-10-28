@@ -57,17 +57,22 @@ def data_loader(dataset_numb, image_size, batch_size, channels):
     return dataloader
 
 
-def run():
-    dataset_numb = 1
+def run(dataset_numb, img_size, batch_size):
+    dataset_numb = dataset_numb
+    img_size = img_size
 
-    img_size = 64
+    # flyttes til GAN-klassen etter hvert
     beta1 = 0.5
     lr = 0.0002
-    batch_size = 32
+
+    # flyttes til dataloader-metoden etter hvert
     numb_channels = 3
+
+    batch_size = batch_size
     dataloader = data_loader()
+
     # further implementation needed
 
 
 if __name__ == "__main__":
-    run()
+    run(1, 64, 32)

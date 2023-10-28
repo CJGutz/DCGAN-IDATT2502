@@ -1,11 +1,9 @@
-# graf som ser på D(x) loss og G(x) loss
-# printe ut bilder etter hver epoch og på starten (2 forskjllige metoder)
 import matplotlib.pyplot as plt
 import torchvision.utils as vutils
 import numpy as np
 
 
-def print_start_img(dataloader, grid_size=(8, 8), title=""):
+def print_start_img(dataloader, grid_size=(8, 8), title="Starting Images"):
     # Get a batch of real images
     real_batch = next(iter(dataloader))
 
