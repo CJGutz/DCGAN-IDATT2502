@@ -2,6 +2,7 @@
 # printe ut bilder etter hver epoch og på starten (2 forskjllige metoder)
 import matplotlib.pyplot as plt
 
+
 def print_start_img():
     return 0
 
