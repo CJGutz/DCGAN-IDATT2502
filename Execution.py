@@ -11,7 +11,7 @@ from tqdm import tqdm
 from Visualization import print_start_img
 
 
-def data_loader(dataset_numb, image_size, batch_size, channels):
+def data_loader(dataset_numb, image_size, batch_size):
     ds_root = "./datasets"
     extract_path = f'{ds_root}/celeba-dataset'
 
@@ -69,7 +69,7 @@ def run(dataset_numb, img_size, batch_size):
     numb_channels = 3
 
     batch_size = batch_size
-    dataloader = data_loader()
+    dataloader = data_loader(dataset_numb, img_size, batch_size)
 
     # further implementation needed
 
