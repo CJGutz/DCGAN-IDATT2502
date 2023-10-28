@@ -5,3 +5,9 @@ This is a project in the course *IDATT2502 - Applied Machine Learning* at the No
 - Tomas Beranek
   
 In this project we have developed a **Deep Convolutional Generative Adversarial Network**.
+
+#How to
+
+ ```console
+    pip install -r requirements.txt
+ ```
