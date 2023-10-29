@@ -34,10 +34,8 @@ class Discriminator(nn.Module):
             )
         self.main.append(nn.AdaptiveAvgPool2d(1))
         self.main.append(CommonConv(first_out_channel *
-                         2 ** (number_of_layers - 1)))
+                         2 ** (number_of_layers - 1), 1,
+            kernel_size=1, stride=1, padding=0))
 
     def forward(self, x):
         return torch.sigmoid(self.main(x))
-
-    def loss(self, x, y):
-        return nn.functional.cross_entropy(self. main(x), y.argmax(1))
