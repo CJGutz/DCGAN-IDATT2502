@@ -11,7 +11,7 @@ from tqdm import tqdm
 # Define Visualization class (in Visualization.py)
 from Visualization import print_start_img
 # Define DCGAN class (in DCGAN.py)
-from DCGAN import DCGAN as gan
+from DCGAN import DCGAN as dcgan
 
 
 def download_and_extract_zip(zip_file_path, extract_path, desc='Extracting files'):
@@ -57,18 +57,32 @@ def data_loader(dataset_numb, image_size, batch_size, ds_root="./datasets"):
 
     return dataloader, nc
 
-
-def run(dataset_numb, img_size, batch_size):
+def run(dataset_numb, img_size, batch_size, numb_epochs):
     dataset_numb = dataset_numb
     img_size = img_size
+    numb_epochs = numb_epochs
+    batch_size = batch_size
+
+    # Check if CUDA (GPU support) is available
+    if torch.cuda.is_available():
+        # Get the number of available GPUs
+        gpu_count = torch.cuda.device_count()
+        print(f"Number of available GPUs: {gpu_count}")
+    else:
+        gpu_count = 0
+        print("CUDA is not available on this system.")
 
     # flyttes til GAN-klassen etter hvert
     beta1 = 0.5
     lr = 0.0002
 
-    batch_size = batch_size
     dataloader, channel_number = data_loader(dataset_numb, img_size, batch_size)
 
+    # Decide which device we want to run on
+    device = torch.device("cuda:0" if (torch.cuda.is_available() and gpu_count > 0) else "cpu")
+
+    # Create an instance of the dcgan
+    gan = dcgan(numb_epochs, dataloader, channel_number, device, batch_size, lr, beta1)
     # further implementation needed
 
 
