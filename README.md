@@ -11,3 +11,9 @@ In this project we have developed a **Deep Convolutional Generative Adversarial 
  ```console
     pip install -r requirements.txt
  ```
+
+# Dataset
+| Dataset number | Dataset Name    |
+|----------------|-----------------|
+| 1              | MNIST - numbers |
+| 2              | CelebA          |
