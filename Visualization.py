@@ -17,13 +17,30 @@ def print_start_img(dataloader, grid_size=(8, 4), title="Starting Images"):
     plt.title(title)
 
     # Display a grid of images
-    image_grid = vutils.make_grid(real_batch[0][:grid_size[0] * grid_size[1]], padding=2, normalize=True, nrow=grid_size[0])
+    image_grid = vutils.make_grid(real_batch[0][:grid_size[0] * grid_size[1]], padding=2, normalize=True,
+                                  nrow=grid_size[0])
     plt.imshow(np.transpose(image_grid.numpy(), (1, 2, 0)))
     plt.show()
 
 
-def print_epoch_img():
-    return 0
+def print_epoch_images(dataloader, img_list, device):
+    real_batch = next(iter(dataloader))
+
+    # Plot the real images
+    plt.figure(figsize=(12, 12))
+    plt.subplot(1, 2, 1)
+    plt.axis("off")
+    plt.title("Real Images")
+    plt.imshow(
+        np.transpose(vutils.make_grid(real_batch[0].to(device)[:64], padding=5, normalize=True).cpu(), (1, 2, 0))
+    )
+
+    # Plot the fake images fom next iter
+    plt.subplot(1, 2, 2)
+    plt.axis("off")
+    plt.title("Fake Images")
+    plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
+    plt.show()
 
 
 # method that shows Generator and Discriminator loss during training
