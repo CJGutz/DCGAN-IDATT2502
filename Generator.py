@@ -6,8 +6,8 @@ class Generator(nn.Module):
     def __init__(self,
                  noise_dim: int,
                  first_out_channel: int,
-                 output_channels: int,
-                 number_of_layers: int = 3,
+                 color_channels: int,
+                 number_of_layers: int = 4,
                  **kwargs):
         super().__init__(**kwargs)
 
@@ -33,7 +33,7 @@ class Generator(nn.Module):
         # Output layer
         self.main.add_module('conv_out',
                              nn.ConvTranspose2d(first_out_channel * 2 ** number_of_layers,
-                                                output_channels,
+                                                color_channels,
                                                 kernel_size=4, stride=2, padding=1, bias=False))
 
     def forward(self, x):
