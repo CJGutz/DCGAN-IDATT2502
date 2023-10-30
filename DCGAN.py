@@ -3,6 +3,7 @@ import torch
 import random
 import torch.nn as nn
 from torch import optim
+import torchvision.utils as vutils
 
 
 # based in the paper by Alec Radford the, the team concluded that the weight should be distributed in this maner
@@ -102,6 +103,11 @@ class DCGAN:
                     print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f'
                           % (epoch, self.num_epochs, i, len(self.dataloader),
                              netD_err.item(), netG_err.item()))
+
+                if (i + 1 % 500 == 0) or ((epoch == self.num_epochs - 1) and (i == len(self.dataloader) - 1)):
+                    with torch.no_grad():
+                        fake = self.generator(fixed_noise).detach().cpu()
+                    img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
 
                 D_losses.append(netD_err.item())
                 G_losses.append(netG_err.item())

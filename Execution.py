@@ -66,7 +66,7 @@ def data_loader(dataset_numb, image_size, batch_size, ds_root="./datasets"):
 
     dataloader = torch.utils.data.DataLoader(
         dataset, batch_size=batch_size, shuffle=True)
-    # print_start_img(dataloader)
+    print_start_img(dataloader)
 
     return dataloader, nc
 
