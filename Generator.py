@@ -12,10 +12,9 @@ class Generator(nn.Module):
         super().__init__(**kwargs)
 
         self.main = nn.Sequential(
-            # Project and reshape the noise vector
-            nn.Linear(noise_dim, first_out_channel * 4 * 4 * 4),
-            nn.Unflatten(1, (first_out_channel, 4, 4)),
-            nn.ReLU(inplace=True)
+            nn.ConvTranspose2d(noise_dim, first_out_channel, kernel_size=4, stride=1, padding=0, bias=False),
+            nn.BatchNorm2d(first_out_channel),
+            nn.ReLU(True),
         )
 
         for i in range(number_of_layers):
