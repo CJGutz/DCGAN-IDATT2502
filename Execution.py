@@ -111,4 +111,4 @@ def run(dataset_numb, img_size, batch_size, numb_epochs, number_of_layers):
 
 
 if __name__ == "__main__":
-    run(2, 64, 32, 5, 4)
+    run(2, 64, 128, 5, 4)
