@@ -32,7 +32,9 @@ class Discriminator(nn.Module):
                     common_leaky_relu,
                 ]
             )
+
         self.main.append(nn.AdaptiveAvgPool2d(1))
+        # self.main.append(nn.Flatten()) see if flatten helps, according to papers it should
         self.main.append(CommonConv(first_out_channel *
                          2 ** (number_of_layers - 1), 1,
             kernel_size=1, stride=1, padding=0))
