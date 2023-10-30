@@ -25,10 +25,14 @@ class Generator(nn.Module):
                                    first_out_channel * 2 ** (i + 1),
                                    kernel_size=4, stride=2, padding=1, bias=False)
             )
+
+            # Create an instance of BatchNorm2d and add it as a module
             self.main.add_module(
+                f'batch_norm_{i}',
                 nn.BatchNorm2d(first_out_channel * 2 ** (i + 1))
             )
-            self.main.add_module(nn.ReLU(inplace=True))
+            # Add ReLU activation as a separate module
+            self.main.add_module(f'relu_{i}', nn.ReLU(inplace=True))
 
         # Output layer
         self.main.add_module('conv_out',

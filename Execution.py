@@ -107,6 +107,8 @@ def run(dataset_numb, img_size, batch_size, numb_epochs, number_of_layers):
     gan = dcgan(numb_epochs, dataloader, channel_number,
                 device, batch_size, lr, beta1)
 
+    print(generator)
+    print(discriminator)
     # further implementation needed
 
 
