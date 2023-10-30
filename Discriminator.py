@@ -13,23 +13,21 @@ class Discriminator(nn.Module):
     def __init__(self,
                  color_channels: int,
                  first_out_channel: int,
-                 number_of_layers: int = 3,
+                 number_of_layers: int = 4,
                  **kwargs):
         super().__init__(**kwargs)
 
-        common_leaky_relu = nn.LeakyReLU(0.2, inplace=True)
-
         self.main = nn.Sequential(
             CommonConv(color_channels, first_out_channel),
-            common_leaky_relu,
+            nn.LeakyReLU(0.2, inplace=True)
         )
-        for i in range(number_of_layers):
+        for i in range(number_of_layers - 1):
             self.main.extend(
                 [
                     CommonConv(first_out_channel * 2 ** i,
                                first_out_channel * 2 ** (i + 1)),
                     nn.BatchNorm2d(first_out_channel * 2 ** (i + 1)),
-                    common_leaky_relu,
+                    nn.LeakyReLU(0.2, inplace=True)
                 ]
             )
         self.main.append(nn.AdaptiveAvgPool2d(1))

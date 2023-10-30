@@ -35,12 +35,15 @@ def data_loader(dataset_numb, image_size, batch_size, ds_root="./datasets"):
         # number of color channels, since its grey scaling, 1 is need, and not 3 (RGB)
         nc = 1
         # needed since the dataset is differently put than the others
-        transform = transforms.Compose([transforms.Resize(image_size), transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
-        dataset = torchvision.datasets.MNIST(root=ds_root, train=True, download=True, transform=transform)
+        transform = transforms.Compose([transforms.Resize(
+            image_size), transforms.ToTensor(), transforms.Normalize((0.5,), (0.5,))])
+        dataset = torchvision.datasets.MNIST(
+            root=ds_root, train=True, download=True, transform=transform)
     else:
         # rest of datasets have 3 color channels
         nc = 3
-        transform = transforms.Compose([transforms.Resize(image_size), transforms.ToTensor(), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+        transform = transforms.Compose([transforms.Resize(image_size), transforms.ToTensor(
+        ), transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
 
         if dataset_numb == 2:
             zip_file_path = f'{ds_root}/img_align_celeba.zip'
@@ -52,10 +55,12 @@ def data_loader(dataset_numb, image_size, batch_size, ds_root="./datasets"):
         elif dataset_numb == 3:
             dataloader = 3
 
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    dataloader = torch.utils.data.DataLoader(
+        dataset, batch_size=batch_size, shuffle=True)
     print_start_img(dataloader)
 
     return dataloader, nc
+
 
 def run(dataset_numb, img_size, batch_size, numb_epochs):
     dataset_numb = dataset_numb
@@ -76,13 +81,16 @@ def run(dataset_numb, img_size, batch_size, numb_epochs):
     beta1 = 0.5
     lr = 0.0002
 
-    dataloader, channel_number = data_loader(dataset_numb, img_size, batch_size)
+    dataloader, channel_number = data_loader(
+        dataset_numb, img_size, batch_size)
 
     # Decide which device we want to run on
-    device = torch.device("cuda:0" if (torch.cuda.is_available() and gpu_count > 0) else "cpu")
+    device = torch.device("cuda:0" if (
+        torch.cuda.is_available() and gpu_count > 0) else "cpu")
 
     # Create an instance of the dcgan
-    gan = dcgan(numb_epochs, dataloader, channel_number, device, batch_size, lr, beta1)
+    gan = dcgan(numb_epochs, dataloader, channel_number,
+                device, batch_size, lr, beta1)
     # further implementation needed
 
 
