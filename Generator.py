@@ -1,42 +1,44 @@
-# CNN laget for Generatoren basert på fagartikelen til Alec Radford
-import torch.nn as nn
 import torch
-
-
-class CommonConv(nn.ConvTranspose2d):
-    def __init__(self, *args, **kwargs):
-        super().__init__(kernel_size=4, stride=2, padding=1, bias=False,
-                         *args, **kwargs)
+import torch.nn as nn
 
 
 class Generator(nn.Module):
     def __init__(self,
-                 generator_input_z: int,
+                 noise_dim: int,
+                 first_out_channel: int,
                  color_channels: int,
-                 last_out_channel: int,
                  number_of_layers: int = 4,
                  **kwargs):
         super().__init__(**kwargs)
 
-        channel_sizes = [generator_input_z]
-        channel_sizes.extend([last_out_channel * 2 ** i
-                              for i in range(number_of_layers, 0, -1)])
+        self.main = nn.Sequential(
+            # Project and reshape the noise vector
+            nn.Linear(noise_dim, first_out_channel * 4 * 4 * 4),
+            nn.Unflatten(1, (first_out_channel, 4, 4)),
+            nn.ReLU(inplace=True)
+        )
 
-        self.main = nn.Sequential()
-        for i in range(len(channel_sizes) - 1):
-            self.main.extend(
-                [
-                    CommonConv(channel_sizes[i], channel_sizes[i+1]),
-                    nn.BatchNorm2d(channel_sizes[i+1]),
-                    nn.ReLU(True),
-                ]
+        for i in range(number_of_layers):
+            self.main.add_module(
+                f'conv_{i}',
+                nn.ConvTranspose2d(first_out_channel * 2 ** i,
+                                   first_out_channel * 2 ** (i + 1),
+                                   kernel_size=4, stride=2, padding=1, bias=False)
             )
 
-        first_conv = self.main[0]
-        first_conv.stride = torch.tensor([1, 1])
-        first_conv.padding = torch.tensor([0, 0])
+            # Create an instance of BatchNorm2d and add it as a module
+            self.main.add_module(
+                f'batch_norm_{i}',
+                nn.BatchNorm2d(first_out_channel * 2 ** (i + 1))
+            )
+            # Add ReLU activation as a separate module
+            self.main.add_module(f'relu_{i}', nn.ReLU(inplace=True))
 
-        self.main.append(CommonConv(last_out_channel, color_channels))
+        # Output layer
+        self.main.add_module('conv_out',
+                             nn.ConvTranspose2d(first_out_channel * 2 ** number_of_layers,
+                                                color_channels,
+                                                kernel_size=4, stride=2, padding=1, bias=False))
 
     def forward(self, x):
         return torch.tanh(self.main(x))
