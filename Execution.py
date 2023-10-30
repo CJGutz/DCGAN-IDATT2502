@@ -104,8 +104,8 @@ def run(dataset_numb, img_size, batch_size, numb_epochs, number_of_layers):
     discriminator = netD(channel_number, ndf, number_of_layers)
 
     # Create an instance of the dcgan
-    gan = dcgan(numb_epochs, dataloader, channel_number,
-                device, batch_size, lr, beta1)
+    gan = dcgan(numb_epochs, dataloader, channel_number, device, generator, discriminator,
+                batch_size, lr, beta1, nz)
 
     print(generator)
     print(discriminator)

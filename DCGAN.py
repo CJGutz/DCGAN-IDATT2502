@@ -3,8 +3,6 @@ import torch
 import random
 import torch.nn as nn
 from torch import optim
-from Generator import Generator as generator
-from Discriminator import Discriminator as discriminator
 
 
 # based in the paper by Alec Radford the, the team concluded that the weight should be distributed in this maner
@@ -18,16 +16,15 @@ def weights(model):
 
 
 class DCGAN:
-    def __init__(self, num_epochs, dataloader, nc, device,
-                 batch_size=32, lr=0.0002, beta1=0.5, nz=100):
+    def __init__(self, num_epochs, dataloader, nc, device, generator, discriminator,
+                 batch_size=128, lr=0.0002, beta1=0.5, nz=100):
         super(DCGAN, self).__init__()
 
         self.device = device
-        # find a better way to apply gen and dis. Maby create them in execution and then just pass them here
-        # self.generator = generator.apply(weights).to(device=self.device)
-        # self.discriminator = discriminator.apply(weights).to(device=self.device)
-        # self.optim_gen = optim.Adam(generator.parameters(), lr=lr, betas=(beta1, 0.999))
-        # self.optim_disc = optim.Adam(discriminator.parameters(), lr=lr, betas=(beta1, 0.999))
+        self.generator = generator.apply(weights).to(device=self.device)
+        self.discriminator = discriminator.apply(weights).to(device=self.device)
+        self.optim_gen = optim.Adam(generator.parameters(), lr=lr, betas=(beta1, 0.999))
+        self.optim_disc = optim.Adam(discriminator.parameters(), lr=lr, betas=(beta1, 0.999))
         self.batch_size = batch_size
         self.lr = lr
         self.num_epochs = num_epochs
@@ -41,6 +38,18 @@ class DCGAN:
         random.seed(manualSeed)
         torch.manual_seed(manualSeed)
         torch.use_deterministic_algorithms(True)
+
+        # Create batch of latent vectors that we will use to visualize
+        #  the progression of the generator
+        fixed_noise = torch.randn(64, self.nz, 1, 1, device=self.device)
+
+        # Hyperparams
+        numb_episodes = len(self.dataloader)
+        criterion = nn.BCELoss().to(self.device)
+
+        # Establish convention for real and fake labels during training
+        real_label = 1.
+        fake_label = 0.
 
     def train(self):
         return 0
