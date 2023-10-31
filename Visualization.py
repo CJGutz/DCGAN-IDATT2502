@@ -1,40 +1,37 @@
 import matplotlib.pyplot as plt
-import torchvision.utils as vutils
 import numpy as np
+import torchvision.utils as vutils
 
 
-def print_start_img(dataloader, grid_size=(8, 4), title="Starting Images"):
-    real_batch = next(iter(dataloader))
-    max_cols = min(grid_size[1], int(real_batch[0].size(0) / grid_size[0]))
-    grid_size = (min(grid_size[0], real_batch[0].size(0)), max_cols)
-
-    # Plot images
+def print_start_img(dataloader, grid_imgs=(8, 5), title="Starting Images"):
+    image_batch = next(iter(dataloader))
     plt.figure(figsize=(5, 5))
     plt.axis("off")
     plt.title(title)
 
     # Display images
-    image_grid = vutils.make_grid(real_batch[0][:grid_size[0] * grid_size[1]], padding=2, normalize=True,
-                                  nrow=grid_size[0])
-    plt.imshow(np.transpose(image_grid.numpy(), (1, 2, 0)))
+    plt.imshow(np.transpose(vutils.make_grid(
+        image_batch[0][:grid_imgs[0] * grid_imgs[1]],
+        padding=2, normalize=True), (1, 2, 0)))
     plt.show()
 
 
-def print_epoch_images(dataloader, img_list, device):
+def print_epoch_images(dataloader, img_list, grid_imgs=(8, 5)):
     real_batch = next(iter(dataloader))
 
     plt.figure(figsize=(12, 12))
     plt.subplot(1, 2, 1)
     plt.axis("off")
     plt.title("Real Images")
-    plt.imshow(
-        np.transpose(vutils.make_grid(real_batch[0].to(device)[:64], padding=5, normalize=True).cpu(), (1, 2, 0))
-    )
+    plt.imshow(np.transpose(vutils.make_grid(
+        real_batch[0][:grid_imgs[0] * grid_imgs[1]],
+        padding=2, normalize=True), (1, 2, 0)))
 
     plt.subplot(1, 2, 2)
     plt.axis("off")
     plt.title("Fake Images")
-    plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
+    # potentially image_list[-1]
+    plt.imshow(np.transpose(img_list, (1, 2, 0)))
     plt.show()
 
 

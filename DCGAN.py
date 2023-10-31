@@ -1,10 +1,10 @@
-# Selve DCGAN klassen
 import torch
 import random
 import torch.nn as nn
 from torch import optim
 import torchvision.utils as vutils
 
+from Visualization import print_epoch_images
 
 # based in the paper by Alec Radford the, the team concluded that the weight should be distributed in this maner
 def weights(model):
@@ -112,6 +112,7 @@ class DCGAN:
                     with torch.no_grad():
                         fake = self.generator(fixed_noise).detach().cpu()
                     img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
+                    print_epoch_images(self.dataloader, img_list)
 
                 # save loss of both D(x) and G(x) for further visualization
                 D_losses.append(netD_loss.item())
