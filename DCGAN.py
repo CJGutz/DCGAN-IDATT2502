@@ -64,53 +64,50 @@ class DCGAN:
 
         for epoch in range(self.num_epochs):
             for i, data_batch in enumerate(self.dataloader, 0):
-                # create a batch of real samples
+                # Train the discriminator on real samples
                 self.discriminator.zero_grad()
-                samples = data_batch[0].to(self.device)
-                samples_size = samples.size(0)
-                labels = torch.full((samples_size,), real_label, dtype=torch.float, device=self.device)
+                real_samples = data_batch[0].to(self.device)
+                labels_real = torch.full((real_samples.size(0),), real_label, dtype=torch.float, device=self.device)
+                netD_predictions_real = self.discriminator.forward(real_samples).view(-1)
+                netD_loss_real = criterion(netD_predictions_real, labels_real)
+                netD_loss_real.backward()
 
-                # forward pass through D
-                netD_predictions = self.discriminator.forward(samples).view(-1)
-
-                # calculate loss log(D(x))
-                netD_err = criterion(netD_predictions, labels)
-                netD_err.backward()
-
-                # create batch of fake samples with G
-                noise = torch.randn(samples_size, self.nz, 1, 1, device=self.device)
+                # Train the discriminator on fake samples
+                noise = torch.randn(real_samples.size(0), self.nz, 1, 1, device=self.device)
                 fake_samples = self.generator(noise)
-                labels.fill_(fake_label)
-
-                # forward pass this patch to D
+                labels_fake = torch.full((real_samples.size(0),), fake_label, dtype=torch.float, device=self.device)
                 netD_predictions_fake = self.discriminator.forward(fake_samples.detach()).view(-1)
+                netD_loss_fake = criterion(netD_predictions_fake, labels_fake)
+                netD_loss_fake.backward()
 
-                # calculate loss log(1 - D(G(z)))
-                netD_fake_err = criterion(netD_predictions_fake, labels)
-                netD_fake_err.backward()
-
-                netD_err += netD_fake_err
+                # Update discriminator weights
+                netD_loss = netD_loss_real + netD_loss_fake
                 self.optim_disc.step()
 
+                # Train the generator
                 self.generator.zero_grad()
-                labels.fill_(real_label)
+                labels_real.fill_(real_label)
                 netG_output = self.discriminator(fake_samples).view(-1)
-                netG_err = criterion(netG_output, labels)
-                netG_err.backward()
+                netG_loss = criterion(netG_output, labels_real)
+                netG_loss.backward()
+
+                # Update generator weights
                 self.optim_gen.step()
 
+                # Print and save losses and generated images
                 if i % 50 == 0:
                     print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f'
                           % (epoch, self.num_epochs, i, len(self.dataloader),
-                             netD_err.item(), netG_err.item()))
+                             netD_loss.item(), netG_loss.item()))
 
-                if (i + 1 % 500 == 0) or ((epoch == self.num_epochs - 1) and (i == len(self.dataloader) - 1)):
+                if ((i + 1) % 500 == 0) or ((epoch == self.num_epochs - 1) and (i == len(self.dataloader) - 1)):
                     with torch.no_grad():
                         fake = self.generator(fixed_noise).detach().cpu()
                     img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
 
-                D_losses.append(netD_err.item())
-                G_losses.append(netG_err.item())
+                # Store losses
+                D_losses.append(netD_loss.item())
+                G_losses.append(netG_loss.item())
 
     def save_model(self):
         return 0
