@@ -64,34 +64,42 @@ class DCGAN:
 
         for epoch in range(self.num_epochs):
             for i, data_batch in enumerate(self.dataloader, 0):
-                # Train the discriminator on real samples
+                # Training netG in real_samples
                 self.discriminator.zero_grad()
+                # real samples created form batches
                 real_samples = data_batch[0].to(self.device)
+                # fills tabel with real label(1)
                 labels_real = torch.full((real_samples.size(0),), real_label, dtype=torch.float, device=self.device)
+
+                # calculate the loss and predicted value from real samples
                 netD_predictions_real = self.discriminator.forward(real_samples).view(-1)
                 netD_loss_real = criterion(netD_predictions_real, labels_real)
                 netD_loss_real.backward()
 
-                # Train the discriminator on fake samples
+                # Testing discriminator on fake samples
                 noise = torch.randn(real_samples.size(0), self.nz, 1, 1, device=self.device)
+                # fake bact of samples created with generator
                 fake_samples = self.generator(noise)
                 labels_fake = torch.full((real_samples.size(0),), fake_label, dtype=torch.float, device=self.device)
+
+                # calculate the predicted value and loss from fake samples
                 netD_predictions_fake = self.discriminator.forward(fake_samples.detach()).view(-1)
                 netD_loss_fake = criterion(netD_predictions_fake, labels_fake)
                 netD_loss_fake.backward()
 
-                # Update discriminator weights
+                # Calculate the total loss of discriminator
                 netD_loss = netD_loss_real + netD_loss_fake
                 self.optim_disc.step()
 
-                # Train the generator
+                # Train netG
                 self.generator.zero_grad()
                 labels_real.fill_(real_label)
+                # loss of generator
                 netG_output = self.discriminator(fake_samples).view(-1)
                 netG_loss = criterion(netG_output, labels_real)
                 netG_loss.backward()
 
-                # Update generator weights
+                # optimizes generator using BCELoss
                 self.optim_gen.step()
 
                 # Print and save losses and generated images
@@ -105,7 +113,7 @@ class DCGAN:
                         fake = self.generator(fixed_noise).detach().cpu()
                     img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
 
-                # Store losses
+                # save loss of both D(x) and G(x) for further visualization
                 D_losses.append(netD_loss.item())
                 G_losses.append(netG_loss.item())
 
