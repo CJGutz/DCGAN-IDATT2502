@@ -66,7 +66,7 @@ def data_loader(dataset_numb, image_size, batch_size, ds_root="./datasets"):
 
     dataloader = torch.utils.data.DataLoader(
         dataset, batch_size=batch_size, shuffle=True)
-    print_start_img(dataloader)
+    # print_start_img(dataloader)
 
     return dataloader, nc
 
@@ -104,12 +104,10 @@ def run(dataset_numb, img_size, batch_size, numb_epochs, number_of_layers):
     discriminator = netD(channel_number, ndf, number_of_layers)
 
     # Create an instance of the dcgan
-    gan = dcgan(numb_epochs, dataloader, channel_number,
-                device, batch_size, lr, beta1)
+    gan = dcgan(numb_epochs, dataloader, channel_number, device, generator, discriminator,
+                batch_size, lr, beta1, nz)
 
-    print(generator)
-    print(discriminator)
-    # further implementation needed
+    gan.train()
 
 
 if __name__ == "__main__":
