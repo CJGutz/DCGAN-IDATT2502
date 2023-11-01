@@ -22,10 +22,13 @@ def run():
     parser.add_argument('-e', '--epochs', default=5, type=int)
     parser.add_argument("-lr", "--learning-rate", default=0.0002, type=float)
     parser.add_argument("-b1", "--beta1", default=0.5, type=float)
-    parser.add_argument("--ndf", default=64, type=int)
-    parser.add_argument("--ngf", default=64, type=int)
-    parser.add_argument("--nz", default=100, type=int)
-    parser.add_argument("-v", "--visualize", default=True, action="store_true")
+    parser.add_argument("--ndf", default=64, type=int,
+                        help="discriminator features")
+    parser.add_argument("--ngf", default=64, type=int,
+                        help="generator features")
+    parser.add_argument("--nz", default=100, type=int,
+                        help="generator noise size")
+    parser.add_argument("--nogui", action="store_true", default=False)
 
     args = parser.parse_args()
 
@@ -39,7 +42,7 @@ def run():
 
     dataloader = data_loader(
         args.dataset, args.img_size, args.batch_size, args.channels)
-    if args.visualize:
+    if not args.nogui:
         print_start_img(dataloader)
 
     # Device is based on CUDA available gpu
@@ -53,7 +56,7 @@ def run():
     # Create an instance of the dcgan
     gan = dcgan(args.epochs, dataloader, args.channels, device, generator,
                 discriminator, args.batch_size, args.learning_rate,
-                args.beta1, args.nz, args.visualize)
+                args.beta1, args.nz, not args.nogui)
 
     gan.train()
 
