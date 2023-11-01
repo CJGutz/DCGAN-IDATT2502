@@ -90,8 +90,8 @@ def run(dataset_numb, img_size, batch_size, numb_epochs, number_of_layers):
             torch.cuda.is_available() and gpu_count > 0) else "cpu")
 
     # Create an instance of discriminator and generator
-    generator = netG(nz, ngf, channel_number)
-    discriminator = netD(channel_number, ndf)
+    generator = netG(nz, ngf, channel_number, number_of_layers)
+    discriminator = netD(channel_number, ndf, number_of_layers)
 
     # Create an instance of the dcgan
     gan = dcgan(numb_epochs, dataloader, channel_number, device, generator, discriminator,
