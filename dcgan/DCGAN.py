@@ -24,11 +24,12 @@ def weights(model):
 
 class DCGAN:
     def __init__(self, num_epochs, dataloader, nc, device, generator, discriminator,
-                 batch_size=128, lr=0.0002, beta1=0.5, nz=100, visualize=True):
+                 batch_size=128, lr=0.0002, beta1=0.5, nz=100, visualize=True, load=None):
         super(DCGAN, self).__init__()
 
         self.device = device
-        self.generator = generator.apply(weights).to(device=self.device)
+        self.generator = generator.apply(
+            weights).to(device=self.device)
         self.discriminator = discriminator.apply(
             weights).to(device=self.device)
         self.optim_gen = optim.Adam(
@@ -42,6 +43,9 @@ class DCGAN:
         self.nz = nz
         self.numb_channels = nc
         self.visualize = visualize
+
+        if load is not None:
+            self.load_model()
 
     def pre_training(self):
         # Create batch of latent vectors that we will use to visualize
