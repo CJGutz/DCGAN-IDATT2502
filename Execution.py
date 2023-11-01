@@ -1,79 +1,36 @@
-import os
-import zipfile
-import tqdm
 import torch
-import torchvision
-import torchvision.datasets as dset
-import torchvision.transforms as transforms
-from torch.utils.data import DataLoader
-from tqdm import tqdm
+import argparse
 
-# Define Visualization class (in Visualization.py)
 from Visualization import print_start_img
-# Define DCGAN class (in DCGAN.py)
-from DCGAN import DCGAN as dcgan
-# Define Discriminator class (in Discriminator.py)
-from Discriminator import Discriminator as netD
-# Define Generator class (in Generator.py)
-from Generator import Generator as netG
+from dcgan.DCGAN import DCGAN as dcgan
+from dcgan.Discriminator import Discriminator as netD
+from dcgan.Generator import Generator as netG
+from DatasetLoader import data_loader
 
 
-def download_and_extract_zip(zip_file_path, extract_path):
-    if not os.path.isdir(extract_path):
-        with zipfile.ZipFile(zip_file_path) as zip_ref:
-            for file in tqdm(zip_ref.namelist()):
-                zip_ref.extract(file, extract_path)
+def run():
 
+    parser = argparse.ArgumentParser(
+        prog="DCGAN implementation",
+    )
+    parser.add_argument("dataset", type=str)
+    parser.add_argument("-c", "--channels", required=True,
+                        type=int, choices=[1, 3])
+    parser.add_argument("-i", "--img-size", default=64, type=int)
+    parser.add_argument("-l", "--layers", default=4, type=int)
+    parser.add_argument('-b', '--batch-size', default=128, type=int)
+    parser.add_argument('-e', '--epochs', default=5, type=int)
+    parser.add_argument("-lr", "--learning-rate", default=0.0002, type=float)
+    parser.add_argument("-b1", "--beta1", default=0.5, type=float)
+    parser.add_argument("--ndf", default=64, type=int,
+                        help="discriminator features")
+    parser.add_argument("--ngf", default=64, type=int,
+                        help="generator features")
+    parser.add_argument("--nz", default=100, type=int,
+                        help="generator noise size")
+    parser.add_argument("--nogui", action="store_true", default=False)
 
-def data_loader(dataset_numb, image_size, batch_size, ds_root="./datasets"):
-    if dataset_numb == 1:
-        # number of color channels, since its grey scaling, 1 is need, and not 3 (RGB)
-        nc = 1
-        # needed since the dataset is differently put than the others
-        transform = transforms.Compose([transforms.Resize(
-            image_size),
-            transforms.ToTensor(),
-            transforms.Normalize((0.5,), (0.5,))])
-        dataset = torchvision.datasets.MNIST(
-            root=ds_root, train=True, download=True, transform=transform)
-    else:
-        # rest of datasets have 3 color channels
-        nc = 3
-        transform = transforms.Compose(
-            [transforms.Resize(image_size),
-             transforms.ToTensor(),
-             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
-             ])
-
-        if dataset_numb == 2:
-            zip_file_path = f'{ds_root}/img_align_celeba.zip'
-            extract_path = f'{ds_root}/celeba-dataset'
-            download_and_extract_zip(zip_file_path, extract_path)
-
-            dataset = dset.ImageFolder(root=extract_path, transform=transform)
-
-        elif dataset_numb == 3:
-            dataloader = 3
-
-    dataloader = torch.utils.data.DataLoader(
-        dataset, batch_size=batch_size, shuffle=True)
-    print_start_img(dataloader)
-
-    return dataloader, nc
-
-
-def run(dataset_numb, img_size, batch_size, numb_epochs, number_of_layers):
-    dataset_numb = dataset_numb
-    img_size = img_size
-    numb_epochs = numb_epochs
-    batch_size = batch_size
-    number_of_layers = number_of_layers
-
-    beta1 = 0.5
-    lr = 0.0002
-    ndf = 64
-    ngf = 64
-    nz = 100
+    args = parser.parse_args()
 
     # Check if CUDA (GPU support) is available
     if torch.cuda.is_available():
@@ -83,22 +40,26 @@ def run(dataset_numb, img_size, batch_size, numb_epochs, number_of_layers):
         gpu_count = 0
         print("CUDA not available")
 
-    dataloader, channel_number = data_loader(dataset_numb, img_size, batch_size)
+    dataloader = data_loader(
+        args.dataset, args.img_size, args.batch_size, args.channels)
+    if not args.nogui:
+        print_start_img(dataloader)
 
     # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (
-            torch.cuda.is_available() and gpu_count > 0) else "cpu")
+        torch.cuda.is_available() and gpu_count > 0) else "cpu")
 
     # Create an instance of discriminator and generator
-    generator = netG(nz, ngf, channel_number, number_of_layers)
-    discriminator = netD(channel_number, ndf, number_of_layers)
+    generator = netG(args.nz, args.ngf, args.channels, args.layers)
+    discriminator = netD(args.channels, args.ndf, args.layers)
 
     # Create an instance of the dcgan
-    gan = dcgan(numb_epochs, dataloader, channel_number, device, generator, discriminator,
-                batch_size, lr, beta1, nz)
+    gan = dcgan(args.epochs, dataloader, args.channels, device, generator,
+                discriminator, args.batch_size, args.learning_rate,
+                args.beta1, args.nz, not args.nogui)
 
     gan.train()
 
 
 if __name__ == "__main__":
-    run(2, 64, 128, 5, 4)
+    run()

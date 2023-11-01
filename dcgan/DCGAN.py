@@ -24,20 +24,24 @@ def weights(model):
 
 class DCGAN:
     def __init__(self, num_epochs, dataloader, nc, device, generator, discriminator,
-                 batch_size=128, lr=0.0002, beta1=0.5, nz=100):
+                 batch_size=128, lr=0.0002, beta1=0.5, nz=100, visualize=True):
         super(DCGAN, self).__init__()
 
         self.device = device
         self.generator = generator.apply(weights).to(device=self.device)
-        self.discriminator = discriminator.apply(weights).to(device=self.device)
-        self.optim_gen = optim.Adam(generator.parameters(), lr=lr, betas=(beta1, 0.999))
-        self.optim_disc = optim.Adam(discriminator.parameters(), lr=lr, betas=(beta1, 0.999))
+        self.discriminator = discriminator.apply(
+            weights).to(device=self.device)
+        self.optim_gen = optim.Adam(
+            generator.parameters(), lr=lr, betas=(beta1, 0.999))
+        self.optim_disc = optim.Adam(
+            discriminator.parameters(), lr=lr, betas=(beta1, 0.999))
         self.batch_size = batch_size
         self.lr = lr
         self.num_epochs = num_epochs
         self.dataloader = dataloader
         self.nz = nz
         self.numb_channels = nc
+        self.visualize = visualize
 
     def pre_training(self):
         # Create batch of latent vectors that we will use to visualize
@@ -69,19 +73,22 @@ class DCGAN:
                                          dtype=torch.float, device=self.device)
 
                 # calculate the loss and predicted value from real samples
-                netD_predictions_real = self.discriminator.forward(real_samples).view(-1)
+                netD_predictions_real = self.discriminator.forward(
+                    real_samples).view(-1)
                 netD_loss_real = criterion(netD_predictions_real, labels_real)
                 netD_loss_real.backward()
 
                 # Testing discriminator on fake samples
-                noise = torch.randn(real_samples.size(0), self.nz, 1, 1, device=self.device)
+                noise = torch.randn(real_samples.size(
+                    0), self.nz, 1, 1, device=self.device)
                 # fake bact of samples created with generator
                 fake_samples = self.generator(noise)
                 labels_fake = torch.full((real_samples.size(0),), Label.fake_label.value,
                                          dtype=torch.float, device=self.device)
 
                 # calculate the predicted value and loss from fake samples
-                netD_predictions_fake = self.discriminator.forward(fake_samples.detach()).view(-1)
+                netD_predictions_fake = self.discriminator.forward(
+                    fake_samples.detach()).view(-1)
                 netD_loss_fake = criterion(netD_predictions_fake, labels_fake)
                 netD_loss_fake.backward()
 
@@ -110,8 +117,10 @@ class DCGAN:
                     self.generator.eval()
                     with torch.no_grad():
                         fake = self.generator(fixed_noise).detach().cpu()
-                    img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
-                    print_epoch_images(self.dataloader, img_list)
+                    img_list.append(vutils.make_grid(
+                        fake, padding=2, normalize=True))
+                    if self.visualize:
+                        print_epoch_images(self.dataloader, img_list)
 
                 # save loss of both D(x) and G(x) for further visualization
                 D_losses.append(netD_loss.item())
