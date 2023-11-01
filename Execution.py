@@ -28,7 +28,7 @@ def run():
     parser.add_argument("--nz", default=100, type=int,
                         help="generator noise size")
     parser.add_argument("--nogui", action="store_true", default=False)
-    parser.add_argument("--load_model", default=False, type=bool)
+    parser.add_argument("--load_model", default=None, type=bool)
 
     args = parser.parse_args()
 

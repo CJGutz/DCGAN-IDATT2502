@@ -13,7 +13,9 @@ def print_start_img(dataloader, grid_imgs=(8, 5), title="Starting Images"):
     plt.imshow(np.transpose(vutils.make_grid(
         image_batch[0][:grid_imgs[0] * grid_imgs[1]],
         padding=2, normalize=True), (1, 2, 0)))
-    plt.show()
+
+    plt.savefig("datasets/figures/start_fig.png")
+    plt.close()
 
 
 def print_epoch_images(dataloader, img_list, grid_imgs=(8, 5)):
