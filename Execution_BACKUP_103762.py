@@ -15,7 +15,42 @@ from DCGAN import DCGAN as dcgan
 from Discriminator import Discriminator as netD
 # Define Generator class (in Generator.py)
 from Generator import Generator as netG
+<<<<<<< HEAD
+
+
+def download_and_extract_zip(zip_file_path, extract_path):
+    if not os.path.isdir(extract_path):
+        with zipfile.ZipFile(zip_file_path) as zip_ref:
+            for file in tqdm(zip_ref.namelist()):
+                zip_ref.extract(file, extract_path)
+
+
+def data_loader(dataset_path, image_size, batch_size, channels):
+
+    normalization_args = (0.5 for _ in range(channels))
+
+    transform = transforms.Compose(
+        [transforms.Resize(image_size),
+            transforms.ToTensor(),
+         transforms.Normalize(normalization_args, normalization_args)
+         ])
+
+    if dataset_path.endswith('.zip'):
+        zip_path = dataset_path
+        dataset_path = os.path.dirname(os.path.realpath(dataset_path))
+        download_and_extract_zip(
+            zip_path, dataset_path)
+
+    dataset = dset.ImageFolder(root=dataset_path, transform=transform)
+
+    dataloader = torch.utils.data.DataLoader(
+        dataset, batch_size=batch_size, shuffle=True)
+    print_start_img(dataloader)
+
+    return dataloader
+=======
 from DatasetLoader import data_loader
+>>>>>>> 15a782f (seperate into Dataloader file)
 
 
 def run():

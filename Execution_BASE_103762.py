@@ -15,7 +15,47 @@ from DCGAN import DCGAN as dcgan
 from Discriminator import Discriminator as netD
 # Define Generator class (in Generator.py)
 from Generator import Generator as netG
-from DatasetLoader import data_loader
+
+
+def download_and_extract_zip(zip_file_path, extract_path, desc='Extracting files'):
+    # If dateset isn't in the directory its downloaded from the zipfile
+    if not os.path.isdir(extract_path):
+        with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+
+            # Get the total number of files in the zip archive
+            total_files = len(zip_ref.namelist())
+            pbar = tqdm(total=total_files, desc=desc)
+
+            # Extract each file and update the progress bar
+            for file in zip_ref.namelist():
+                zip_ref.extract(file, extract_path)
+                pbar.update(1)
+            pbar.close()
+
+
+def data_loader(dataset_path, image_size, batch_size, channels):
+
+    normalization_args = (0.5 for _ in range(channels))
+
+    transform = transforms.Compose(
+        [transforms.Resize(image_size),
+            transforms.ToTensor(),
+         transforms.Normalize(normalization_args, normalization_args)
+         ])
+
+    if dataset_path.endswith('.zip'):
+        zip_path = dataset_path
+        dataset_path = os.path.dirname(os.path.realpath(dataset_path))
+        download_and_extract_zip(
+            zip_path, dataset_path)
+
+    dataset = dset.ImageFolder(root=dataset_path, transform=transform)
+
+    dataloader = torch.utils.data.DataLoader(
+        dataset, batch_size=batch_size, shuffle=True)
+    # print_start_img(dataloader)
+
+    return dataloader
 
 
 def run():
@@ -40,16 +80,17 @@ def run():
 
     # Check if CUDA (GPU support) is available
     if torch.cuda.is_available():
+        # Get the number of available GPUs
         gpu_count = torch.cuda.device_count()
-        print("GPU number available: ", gpu_count)
+        print(f"Number of available GPUs: {gpu_count}")
     else:
         gpu_count = 0
-        print("CUDA not available")
+        print("CUDA is not available on this system.")
 
     dataloader = data_loader(
         args.dataset, args.img_size, args.batch_size, args.channels)
 
-    # Device is based on CUDA available gpu
+    # Decide which device we want to run on
     device = torch.device("cuda:0" if (
         torch.cuda.is_available() and gpu_count > 0) else "cpu")
 
@@ -59,7 +100,7 @@ def run():
 
     # Create an instance of the dcgan
     gan = dcgan(args.epochs, dataloader, args.channels, device, generator,
-                discriminator, args.batch_size, args.learning_rate, args.beta1, args.nz)
+                discriminator, args.batch_size, args.lr, args.beta1, args.nz)
 
     gan.train()
 

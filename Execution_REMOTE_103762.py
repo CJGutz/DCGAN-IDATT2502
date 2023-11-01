@@ -40,16 +40,17 @@ def run():
 
     # Check if CUDA (GPU support) is available
     if torch.cuda.is_available():
+        # Get the number of available GPUs
         gpu_count = torch.cuda.device_count()
-        print("GPU number available: ", gpu_count)
+        print(f"Number of available GPUs: {gpu_count}")
     else:
         gpu_count = 0
-        print("CUDA not available")
+        print("CUDA is not available on this system.")
 
     dataloader = data_loader(
         args.dataset, args.img_size, args.batch_size, args.channels)
 
-    # Device is based on CUDA available gpu
+    # Decide which device we want to run on
     device = torch.device("cuda:0" if (
         torch.cuda.is_available() and gpu_count > 0) else "cpu")
 
