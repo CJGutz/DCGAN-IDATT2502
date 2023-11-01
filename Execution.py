@@ -18,20 +18,11 @@ from Discriminator import Discriminator as netD
 from Generator import Generator as netG
 
 
-def download_and_extract_zip(zip_file_path, extract_path, desc='Extracting files'):
-    # If dateset isn't in the directory its downloaded from the zipfile
+def download_and_extract_zip(zip_file_path, extract_path):
     if not os.path.isdir(extract_path):
-        with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
-
-            # Get the total number of files in the zip archive
-            total_files = len(zip_ref.namelist())
-            pbar = tqdm(total=total_files, desc=desc)
-
-            # Extract each file and update the progress bar
-            for file in zip_ref.namelist():
+        with zipfile.ZipFile(zip_file_path) as zip_ref:
+            for file in tqdm(zip_ref.namelist()):
                 zip_ref.extract(file, extract_path)
-                pbar.update(1)
-            pbar.close()
 
 
 def data_loader(dataset_numb, image_size, batch_size, ds_root="./datasets"):
@@ -66,7 +57,7 @@ def data_loader(dataset_numb, image_size, batch_size, ds_root="./datasets"):
 
     dataloader = torch.utils.data.DataLoader(
         dataset, batch_size=batch_size, shuffle=True)
-    # print_start_img(dataloader)
+    print_start_img(dataloader)
 
     return dataloader, nc
 
@@ -86,16 +77,15 @@ def run(dataset_numb, img_size, batch_size, numb_epochs, number_of_layers):
 
     # Check if CUDA (GPU support) is available
     if torch.cuda.is_available():
-        # Get the number of available GPUs
         gpu_count = torch.cuda.device_count()
-        print(f"Number of available GPUs: {gpu_count}")
+        print("GPU number available: ", gpu_count)
     else:
         gpu_count = 0
-        print("CUDA is not available on this system.")
+        print("CUDA not available")
 
     dataloader, channel_number = data_loader(dataset_numb, img_size, batch_size)
 
-    # Decide which device we want to run on
+    # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (
             torch.cuda.is_available() and gpu_count > 0) else "cpu")
 
