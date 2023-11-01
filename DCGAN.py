@@ -42,12 +42,6 @@ class DCGAN:
         self.numb_channels = nc
 
     def pre_training(self):
-        # Set random seed for reproducibility
-        manualSeed = random.randint(1, 10000)
-        random.seed(manualSeed)
-        torch.manual_seed(manualSeed)
-        torch.use_deterministic_algorithms(True)
-
         # Create batch of latent vectors that we will use to visualize
         #  the progression of the generator
         fixed_noise = torch.randn(64, self.nz, 1, 1, device=self.device)
@@ -56,10 +50,10 @@ class DCGAN:
         numb_episodes = len(self.dataloader)
         criterion = nn.BCELoss().to(self.device)
 
-        return manualSeed, fixed_noise, numb_episodes, criterion
+        return fixed_noise, numb_episodes, criterion
 
     def train(self):
-        (manual_seed, fixed_noise, numb_episodes,
+        (fixed_noise, numb_episodes,
          criterion) = self.pre_training()
 
         img_list = []
@@ -115,6 +109,7 @@ class DCGAN:
                              netD_loss.item(), netG_loss.item()))
 
                 if ((i + 1) % 500 == 0) or ((epoch == self.num_epochs - 1) and (i == len(self.dataloader) - 1)):
+                    self.generator.eval()
                     with torch.no_grad():
                         fake = self.generator(fixed_noise).detach().cpu()
                     img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
