@@ -3,10 +3,18 @@ import random
 import torch.nn as nn
 from torch import optim
 import torchvision.utils as vutils
+from enum import Enum
 
 from Visualization import print_epoch_images
 
-# based in the paper by Alec Radford the, the team concluded that the weight should be distributed in this maner
+
+class Label(Enum):
+    real_label = 1.
+    fake_label = 0.
+
+
+# based in the paper by Alec Radford the, the team concluded that the weight should be distributed in this manner
+
 def weights(model):
     classname = model.__class__.__name__
     if classname.find('Conv') != -1:
@@ -48,15 +56,11 @@ class DCGAN:
         numb_episodes = len(self.dataloader)
         criterion = nn.BCELoss().to(self.device)
 
-        # Establish convention for real and fake labels during training
-        real_label = 1.
-        fake_label = 0.
-
-        return manualSeed, fixed_noise, numb_episodes, criterion, real_label, fake_label
+        return manualSeed, fixed_noise, numb_episodes, criterion
 
     def train(self):
         (manual_seed, fixed_noise, numb_episodes,
-         criterion, real_label, fake_label) = self.pre_training()
+         criterion) = self.pre_training()
 
         img_list = []
         G_losses = []
@@ -69,7 +73,8 @@ class DCGAN:
                 # real samples created form batches
                 real_samples = data_batch[0].to(self.device)
                 # fills tabel with real label(1)
-                labels_real = torch.full((real_samples.size(0),), real_label, dtype=torch.float, device=self.device)
+                labels_real = torch.full((real_samples.size(0),), Label.real_label.value,
+                                         dtype=torch.float, device=self.device)
 
                 # calculate the loss and predicted value from real samples
                 netD_predictions_real = self.discriminator.forward(real_samples).view(-1)
@@ -80,7 +85,8 @@ class DCGAN:
                 noise = torch.randn(real_samples.size(0), self.nz, 1, 1, device=self.device)
                 # fake bact of samples created with generator
                 fake_samples = self.generator(noise)
-                labels_fake = torch.full((real_samples.size(0),), fake_label, dtype=torch.float, device=self.device)
+                labels_fake = torch.full((real_samples.size(0),), Label.fake_label.value,
+                                         dtype=torch.float, device=self.device)
 
                 # calculate the predicted value and loss from fake samples
                 netD_predictions_fake = self.discriminator.forward(fake_samples.detach()).view(-1)
@@ -93,7 +99,7 @@ class DCGAN:
 
                 # Train netG
                 self.generator.zero_grad()
-                labels_real.fill_(real_label)
+                labels_real.fill_(Label.real_label.value)
                 # loss of generator
                 netG_output = self.discriminator(fake_samples).view(-1)
                 netG_loss = criterion(netG_output, labels_real)
