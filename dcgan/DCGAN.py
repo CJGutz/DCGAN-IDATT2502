@@ -127,7 +127,20 @@ class DCGAN:
                 G_losses.append(netG_loss.item())
 
     def save_model(self):
-        return 0
+        PATH = f'./models/saved-model.pt'
+
+        torch.save({
+            "discriminator": self.discriminator.state_dict(),
+            "generator": self.generator.state_dict(),
+            "netD_optimize": self.optim_disc.state_dict(),
+            "netG_optimize": self.optim_gen.state_dict(),
+        }, PATH)
 
     def load_model(self):
-        return 0
+        PATH = f'./models/saved-model.pt'
+        checkpoint = torch.load(PATH)
+
+        self.discriminator.load_state_dict(checkpoint["discriminator"])
+        self.generator.load_state_dict(checkpoint["generator"])
+        self.optim_disc.load_state_dict(checkpoint["netD_optimize"])
+        self.optim_gen.load_state_dict(checkpoint["netG_optimize"])
