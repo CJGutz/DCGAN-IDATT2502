@@ -23,11 +23,12 @@ def weights(model):
 
 
 class DCGAN:
-    def __init__(self, num_epochs, dataloader, nc, device, generator, discriminator,
+    def __init__(self, num_epochs, dataloader, model_name, nc, device, generator, discriminator,
                  batch_size=128, lr=0.0002, beta1=0.5, nz=100, visualize=True, load=None):
         super(DCGAN, self).__init__()
 
         self.device = device
+        self.model_name = model_name
         self.generator = generator.apply(
             weights).to(device=self.device)
         self.discriminator = discriminator.apply(
@@ -131,7 +132,7 @@ class DCGAN:
                 G_losses.append(netG_loss.item())
 
     def save_model(self):
-        PATH = f'./models/saved-model.pt'
+        PATH = f'./{self.model_name}/saved-model.pt'
 
         torch.save({
             "discriminator": self.discriminator.state_dict(),
@@ -141,7 +142,7 @@ class DCGAN:
         }, PATH)
 
     def load_model(self):
-        PATH = f'./models/saved-model.pt'
+        PATH = f'./{self.model_name}/saved-model.pt'
         checkpoint = torch.load(PATH)
 
         self.discriminator.load_state_dict(checkpoint["discriminator"])

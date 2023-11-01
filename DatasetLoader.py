@@ -22,7 +22,6 @@ def download_and_extract_zip(zip_file_path, extract_path):
 
 
 def data_loader(dataset_path, image_size, batch_size, channels, dataset_dir="./datasets"):
-
     normalization_args = list((0.5 for _ in range(channels)))
 
     transform = transforms.Compose(
@@ -35,6 +34,7 @@ def data_loader(dataset_path, image_size, batch_size, channels, dataset_dir="./d
         dataset = VISION_DATASETS[dataset_path]
         dataset = dataset(root=dataset_dir, train=True,
                           transform=transform, download=True,)
+        model_name = "model_1"
     else:
         if dataset_path.endswith('.zip'):
             zip_path = dataset_path
@@ -43,8 +43,9 @@ def data_loader(dataset_path, image_size, batch_size, channels, dataset_dir="./d
                 zip_path, dataset_path)
 
         dataset = dset.ImageFolder(root=dataset_path, transform=transform)
+        model_name = "model_2"
 
     dataloader = torch.utils.data.DataLoader(
         dataset, batch_size=batch_size, shuffle=True)
 
-    return dataloader
+    return dataloader, model_name

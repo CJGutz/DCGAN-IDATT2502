@@ -41,7 +41,7 @@ def run():
         gpu_count = 0
         print("CUDA not available")
 
-    dataloader = data_loader(
+    dataloader, model_name = data_loader(
         args.dataset, args.img_size, args.batch_size, args.channels)
     if not args.nogui:
         print_start_img(dataloader)
@@ -55,12 +55,16 @@ def run():
     discriminator = netD(args.channels, args.ndf, args.layers)
 
     # Create an instance of the dcgan
-    gan = dcgan(args.epochs, dataloader, args.channels, device, generator,
+    gan = dcgan(args.epochs, dataloader, model_name, args.channels, device, generator,
                 discriminator, args.batch_size, args.learning_rate,
                 args.beta1, args.nz, not args.nogui, args.load_model)
 
-    gan.train()
-    gan.save_model()
+    if args.load_model is not None:
+        gan.load_model()
+
+    else:
+        gan.train()
+        gan.save_model()
 
 
 if __name__ == "__main__":
