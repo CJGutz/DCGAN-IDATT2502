@@ -29,6 +29,7 @@ def run():
     parser.add_argument("--nz", default=100, type=int,
                         help="generator noise size")
     parser.add_argument("--nogui", action="store_true", default=False)
+    parser.add_argument("--load_model", default=False, type=bool)
 
     args = parser.parse_args()
 
@@ -56,9 +57,10 @@ def run():
     # Create an instance of the dcgan
     gan = dcgan(args.epochs, dataloader, args.channels, device, generator,
                 discriminator, args.batch_size, args.learning_rate,
-                args.beta1, args.nz, not args.nogui)
+                args.beta1, args.nz, not args.nogui, args.load_model)
 
     gan.train()
+    gan.save_model()
 
 
 if __name__ == "__main__":
