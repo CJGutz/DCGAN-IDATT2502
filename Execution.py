@@ -25,6 +25,7 @@ def run():
     parser.add_argument("--ndf", default=64, type=int)
     parser.add_argument("--ngf", default=64, type=int)
     parser.add_argument("--nz", default=100, type=int)
+    parser.add_argument("-v", "--visualize", default=True, action="store_true")
 
     args = parser.parse_args()
 
@@ -38,7 +39,8 @@ def run():
 
     dataloader = data_loader(
         args.dataset, args.img_size, args.batch_size, args.channels)
-    print_start_img(dataloader)
+    if args.visualize:
+        print_start_img(dataloader)
 
     # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (
@@ -51,7 +53,7 @@ def run():
     # Create an instance of the dcgan
     gan = dcgan(args.epochs, dataloader, args.channels, device, generator,
                 discriminator, args.batch_size, args.learning_rate,
-                args.beta1, args.nz)
+                args.beta1, args.nz, args.visualize)
 
     gan.train()
 
