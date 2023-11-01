@@ -38,6 +38,7 @@ def run():
 
     dataloader = data_loader(
         args.dataset, args.img_size, args.batch_size, args.channels)
+    print_start_img(dataloader)
 
     # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (
