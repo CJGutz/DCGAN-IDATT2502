@@ -2,9 +2,9 @@ import torch
 import argparse
 
 from Visualization import print_start_img
-from DCGAN import DCGAN as dcgan
-from Discriminator import Discriminator as netD
-from Generator import Generator as netG
+from dcgan.DCGAN import DCGAN as dcgan
+from dcgan.Discriminator import Discriminator as netD
+from dcgan.Generator import Generator as netG
 from DatasetLoader import data_loader
 
 
