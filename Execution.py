@@ -9,7 +9,6 @@ from DatasetLoader import data_loader
 
 
 def run():
-
     parser = argparse.ArgumentParser(
         prog="DCGAN implementation",
     )
@@ -48,7 +47,7 @@ def run():
 
     # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (
-        torch.cuda.is_available() and gpu_count > 0) else "cpu")
+            torch.cuda.is_available() and gpu_count > 0) else "cpu")
 
     # Create an instance of discriminator and generator
     generator = netG(args.nz, args.ngf, args.channels, args.layers)
@@ -59,10 +58,7 @@ def run():
                 discriminator, args.batch_size, args.learning_rate,
                 args.beta1, args.nz, not args.nogui, args.load_model)
 
-    if args.load_model is not None:
-        gan.load_model()
-
-    else:
+    if args.load_model is None:
         gan.train()
         gan.save_model()
 
