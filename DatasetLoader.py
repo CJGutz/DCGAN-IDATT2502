@@ -7,7 +7,7 @@ import torchvision.datasets as dset
 from tqdm import tqdm
 
 
-torchvision_datasets = {
+VISION_DATASETS = {
     "MNIST": dset.MNIST,
     "FashionMNIST": dset.FashionMNIST,
     "CIFAR10": dset.CIFAR10,
@@ -31,8 +31,8 @@ def data_loader(dataset_path, image_size, batch_size, channels, dataset_dir="./d
          transforms.Normalize(normalization_args, normalization_args)
          ])
 
-    if dataset_path in torchvision_datasets.keys():
-        dataset = torchvision_datasets[dataset_path]
+    if dataset_path in VISION_DATASETS.keys():
+        dataset = VISION_DATASETS[dataset_path]
         dataset = dataset(root=dataset_dir, train=True,
                           transform=transform, download=True,)
     else:

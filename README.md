@@ -12,8 +12,8 @@ In this project we have developed a **Deep Convolutional Generative Adversarial 
     pip install -r requirements.txt
  ```
 
-# Dataset
-| Dataset number | Dataset Name    |
-|----------------|-----------------|
-| 1              | MNIST - numbers |
-| 2              | CelebA          |
+# Datasets
+
+Set your preferred dataset as the argument to run the file.
+If you want to use a dataset from torchvision, you can see the [DatasetLoader.py](./DatasetLoader.py) file
+for a list of supported datasets. Just use the name of the dataset as the argument.

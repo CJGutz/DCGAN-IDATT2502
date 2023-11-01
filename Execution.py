@@ -1,19 +1,9 @@
-import os
-import zipfile
-import tqdm
 import torch
-import torchvision.datasets as dset
-import torchvision.transforms as transforms
-from tqdm import tqdm
 import argparse
 
-# Define Visualization class (in Visualization.py)
 from Visualization import print_start_img
-# Define DCGAN class (in DCGAN.py)
 from DCGAN import DCGAN as dcgan
-# Define Discriminator class (in Discriminator.py)
 from Discriminator import Discriminator as netD
-# Define Generator class (in Generator.py)
 from Generator import Generator as netG
 from DatasetLoader import data_loader
 
@@ -59,7 +49,8 @@ def run():
 
     # Create an instance of the dcgan
     gan = dcgan(args.epochs, dataloader, args.channels, device, generator,
-                discriminator, args.batch_size, args.learning_rate, args.beta1, args.nz)
+                discriminator, args.batch_size, args.learning_rate,
+                args.beta1, args.nz)
 
     gan.train()
 
