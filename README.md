@@ -14,6 +14,6 @@ In this project we have developed a **Deep Convolutional Generative Adversarial 
 
 # Datasets
 
-Set your preferred dataset as the argument to run the file.
+Set your preferred dataset directory or zip path as the argument to use it.
 If you want to use a dataset from torchvision, you can see the [DatasetLoader.py](./DatasetLoader.py) file
 for a list of supported datasets. Just use the name of the dataset as the argument.
