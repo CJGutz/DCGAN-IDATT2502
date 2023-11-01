@@ -38,7 +38,7 @@ def data_loader(dataset_path, image_size, batch_size, channels, dataset_dir="./d
     else:
         if dataset_path.endswith('.zip'):
             zip_path = dataset_path
-            dataset_path = os.path.dirname(os.path.realpath(dataset_path))
+            dataset_path = dataset_path.replace('.zip', '')
             download_and_extract_zip(
                 zip_path, dataset_path)
 
