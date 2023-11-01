@@ -1,5 +1,4 @@
 import torch
-import random
 import torch.nn as nn
 from torch import optim
 import torchvision.utils as vutils
@@ -14,7 +13,6 @@ class Label(Enum):
 
 
 # based in the paper by Alec Radford the, the team concluded that the weight should be distributed in this manner
-
 def weights(model):
     classname = model.__class__.__name__
     if classname.find('Conv') != -1:

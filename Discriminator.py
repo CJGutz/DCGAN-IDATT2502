@@ -13,7 +13,7 @@ class Discriminator(nn.Module):
     def __init__(self,
                  numb_color_channels,
                  ndf,
-                 number_of_layers=4,
+                 number_of_layers=3,
                  **kwargs):
         super().__init__(**kwargs)
 
