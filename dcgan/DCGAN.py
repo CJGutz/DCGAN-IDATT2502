@@ -70,7 +70,7 @@ class DCGAN:
 
         for epoch in range(self.num_epochs):
             for i, data_batch in enumerate(self.dataloader, 0):
-                # Training netG in real_samples
+                # training netG in real_samples
                 self.discriminator.zero_grad()
                 # real samples created form batches
                 real_samples = data_batch[0].to(self.device)
@@ -98,11 +98,11 @@ class DCGAN:
                 netD_loss_fake = criterion(netD_predictions_fake, labels_fake)
                 netD_loss_fake.backward()
 
-                # Calculate the total loss of discriminator
+                # calculate the total loss of discriminator
                 netD_loss = netD_loss_real + netD_loss_fake
                 self.optim_disc.step()
 
-                # Train netG
+                # train netG
                 self.generator.zero_grad()
                 labels_real.fill_(Label.real_label.value)
                 # loss of generator
@@ -119,6 +119,7 @@ class DCGAN:
                           % (epoch, self.num_epochs, i, len(self.dataloader),
                              netD_loss.item(), netG_loss.item()))
 
+                # if statement used for printing images
                 if ((itr + 1) % 500 == 0) or ((epoch == self.num_epochs - 1) and (i == len(self.dataloader) - 1)):
                     self.generator.eval()
                     with torch.no_grad():
@@ -126,9 +127,8 @@ class DCGAN:
                     img_list.append(vutils.make_grid(
                         fake, padding=2, normalize=True))
                     if self.visualize:
-                        print_epoch_images(self.dataloader, img_list, itr)
+                        print_epoch_images(self.dataloader, img_list, (itr+1)/500)
                 itr += 1
-
                 # save loss of both D(x) and G(x) for further visualization
                 D_losses.append(netD_loss.item())
                 G_losses.append(netG_loss.item())

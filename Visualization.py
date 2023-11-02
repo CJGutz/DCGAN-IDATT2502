@@ -18,7 +18,7 @@ def print_start_img(dataloader, grid_imgs=(8, 5), title="Starting Images"):
     plt.close()
 
 
-def print_epoch_images(dataloader, img_list, iterator, grid_imgs=(8, 5)):
+def print_epoch_images(dataloader, img_list, iterator, grid_imgs=(8, 8)):
     real_batch = next(iter(dataloader))
 
     plt.figure(figsize=(12, 12))
@@ -32,8 +32,7 @@ def print_epoch_images(dataloader, img_list, iterator, grid_imgs=(8, 5)):
     plt.subplot(1, 2, 2)
     plt.axis("off")
     plt.title("Fake Images")
-    # potentially image_list[-1]
-    plt.imshow(np.transpose(img_list, (1, 2, 0)))
+    plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
     plt.savefig(f"datasets/figures/epoch_fig{iterator}.png")
     plt.close()
 
