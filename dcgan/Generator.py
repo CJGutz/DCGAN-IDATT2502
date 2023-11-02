@@ -7,7 +7,7 @@ class Generator(nn.Module):
                  noise,
                  ngf,
                  numb_color_channels,
-                 number_of_layers=4,
+                 number_of_layers=3,
                  **kwargs):
         super().__init__(**kwargs)
 
