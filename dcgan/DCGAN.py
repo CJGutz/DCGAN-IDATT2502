@@ -66,6 +66,7 @@ class DCGAN:
         img_list = []
         G_losses = []
         D_losses = []
+        itr = 0
 
         for epoch in range(self.num_epochs):
             for i, data_batch in enumerate(self.dataloader, 0):
@@ -113,21 +114,20 @@ class DCGAN:
                 self.optim_gen.step()
 
                 # Print and save losses and generated images
-                iterator = 0
-                if iterator % 50 == 0:
+                if itr % 50 == 0:
                     print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f'
                           % (epoch, self.num_epochs, i, len(self.dataloader),
                              netD_loss.item(), netG_loss.item()))
 
-                if ((iterator + 1) % 500 == 0) or ((epoch == self.num_epochs - 1) and (i == len(self.dataloader) - 1)):
+                if ((itr + 1) % 500 == 0) or ((epoch == self.num_epochs - 1) and (i == len(self.dataloader) - 1)):
                     self.generator.eval()
                     with torch.no_grad():
                         fake = self.generator(fixed_noise).detach().cpu()
                     img_list.append(vutils.make_grid(
                         fake, padding=2, normalize=True))
                     if self.visualize:
-                        print_epoch_images(self.dataloader, img_list, iterator)
-                    iterator += 1
+                        print_epoch_images(self.dataloader, img_list, itr)
+                itr += 1
 
                 # save loss of both D(x) and G(x) for further visualization
                 D_losses.append(netD_loss.item())

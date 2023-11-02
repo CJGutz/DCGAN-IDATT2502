@@ -48,7 +48,7 @@ def run():
     # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (
             torch.cuda.is_available() and gpu_count > 0) else "cpu")
-
+    device = "cpu"
     # Create an instance of discriminator and generator
     generator = netG(args.nz, args.ngf, args.channels, args.layers)
     discriminator = netD(args.channels, args.ndf, args.layers)
