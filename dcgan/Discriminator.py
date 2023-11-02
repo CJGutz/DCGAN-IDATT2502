@@ -21,7 +21,7 @@ class Discriminator(nn.Module):
             CommonConv(numb_color_channels, ndf),
             nn.LeakyReLU(0.2, inplace=True)
         )
-        for i in range(number_of_layers - 1):
+        for i in range(number_of_layers):
             self.main.extend(
                 [
                     CommonConv(ndf * 2 ** i,
@@ -32,10 +32,12 @@ class Discriminator(nn.Module):
             )
 
         self.main.append(nn.AdaptiveAvgPool2d(1))
-        # self.main.append(nn.Flatten()) see if flatten helps, according to papers it should
         self.main.append(CommonConv(ndf *
-                                    2 ** (number_of_layers - 1), 1,
+                                    2 ** number_of_layers, 1,
                                     kernel_size=1, stride=1, padding=0))
+        self.main.append(nn.LeakyReLU(0.2, inplace=True))
+        self.main.append(nn.Flatten())
+        self.main.append(nn.Sigmoid())
 
     def forward(self, x):
-        return torch.sigmoid(self.main(x))
+        return self.main(x)

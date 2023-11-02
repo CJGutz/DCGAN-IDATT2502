@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from torch import optim
+import torch.optim as optim
 import torchvision.utils as vutils
 from enum import Enum
 
@@ -30,9 +30,9 @@ class DCGAN:
         self.device = device
         self.model_name = model_name
         self.generator = generator.apply(
-            weights).to(device=self.device)
+            weights)
         self.discriminator = discriminator.apply(
-            weights).to(device=self.device)
+            weights)
         self.optim_gen = optim.Adam(
             generator.parameters(), lr=lr, betas=(beta1, 0.999))
         self.optim_disc = optim.Adam(
@@ -75,13 +75,12 @@ class DCGAN:
                 # real samples created form batches
                 real_samples = data_batch[0].to(self.device)
                 # fills tabel with real label(1)
-                labels_real = torch.full((real_samples.size(0),), Label.real_label.value,
-                                         dtype=torch.float, device=self.device)
+                labels = torch.full((real_samples.size(0),), Label.real_label.value,
+                                    dtype=torch.float, device=self.device)
 
                 # calculate the loss and predicted value from real samples
-                netD_predictions_real = self.discriminator.forward(
-                    real_samples).view(-1)
-                netD_loss_real = criterion(netD_predictions_real, labels_real)
+                netD_predictions_real = self.discriminator(real_samples).view(-1)
+                netD_loss_real = criterion(netD_predictions_real, labels)
                 netD_loss_real.backward()
 
                 # Testing discriminator on fake samples
@@ -89,13 +88,11 @@ class DCGAN:
                                     device=self.device)
                 # fake bact of samples created with generator
                 fake_samples = self.generator(noise)
-                labels_fake = torch.full((real_samples.size(0),), Label.fake_label.value,
-                                         dtype=torch.float, device=self.device)
+                labels.fill_(Label.fake_label.value)
 
                 # calculate the predicted value and loss from fake samples
-                netD_predictions_fake = self.discriminator.forward(
-                    fake_samples.detach()).view(-1)
-                netD_loss_fake = criterion(netD_predictions_fake, labels_fake)
+                netD_predictions_fake = self.discriminator(fake_samples.detach()).view(-1)
+                netD_loss_fake = criterion(netD_predictions_fake, labels)
                 netD_loss_fake.backward()
 
                 # calculate the total loss of discriminator
@@ -104,10 +101,10 @@ class DCGAN:
 
                 # train netG
                 self.generator.zero_grad()
-                labels_real.fill_(Label.real_label.value)
+                labels.fill_(Label.real_label.value)
                 # loss of generator
                 netG_output = self.discriminator(fake_samples).view(-1)
-                netG_loss = criterion(netG_output, labels_real)
+                netG_loss = criterion(netG_output, labels)
                 netG_loss.backward()
 
                 # optimizes generator using BCELoss
@@ -127,8 +124,9 @@ class DCGAN:
                     img_list.append(vutils.make_grid(
                         fake, padding=2, normalize=True))
                     if self.visualize:
-                        print_epoch_images(self.dataloader, img_list, (itr+1)/500)
+                        print_epoch_images(self.dataloader, img_list, (itr + 1) / 500)
                 itr += 1
+
                 # save loss of both D(x) and G(x) for further visualization
                 D_losses.append(netD_loss.item())
                 G_losses.append(netG_loss.item())

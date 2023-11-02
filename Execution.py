@@ -50,8 +50,8 @@ def run():
             torch.cuda.is_available() and gpu_count > 0) else "cpu")
     device = "cpu"
     # Create an instance of discriminator and generator
-    generator = netG(args.nz, args.ngf, args.channels, args.layers)
-    discriminator = netD(args.channels, args.ndf, args.layers)
+    generator = netG(args.nz, args.ngf, args.channels, args.layers).to(device)
+    discriminator = netD(args.channels, args.ndf, args.layers).to(device)
 
     # Create an instance of the dcgan
     gan = dcgan(args.epochs, dataloader, model_name, args.channels, device, generator,
