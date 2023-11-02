@@ -23,7 +23,7 @@ def weights(model):
 
 
 class DCGAN:
-    def __init__(self, num_epochs, dataloader, model_name, nc, device, generator, discriminator,
+    def __init__(self, generator, discriminator, num_epochs, dataloader, model_name, nc, device,
                  batch_size=128, lr=0.0002, beta1=0.5, nz=100, visualize=True, load=None):
         super(DCGAN, self).__init__()
 

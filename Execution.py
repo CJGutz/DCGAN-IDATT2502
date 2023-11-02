@@ -3,8 +3,8 @@ import argparse
 
 from Visualization import print_start_img
 from dcgan.DCGAN import DCGAN as dcgan
-from dcgan.Discriminator import Discriminator as netD
-from dcgan.Generator import Generator as netG
+from dcgan.Discriminator import Discriminator
+from dcgan.Generator import Generator
 from DatasetLoader import data_loader
 
 
@@ -50,13 +50,13 @@ def run():
             torch.cuda.is_available() and gpu_count > 0) else "cpu")
     device = "cpu"
     # Create an instance of discriminator and generator
-    generator = netG(args.nz, args.ngf, args.channels, args.layers).to(device)
-    discriminator = netD(args.channels, args.ndf, args.layers).to(device)
+    generator = Generator(args.nz, args.ngf, args.channels, args.layers).to(device)
+    discriminator = Discriminator(args.channels, args.ndf, args.layers).to(device)
 
     # Create an instance of the dcgan
-    gan = dcgan(args.epochs, dataloader, model_name, args.channels, device, generator,
-                discriminator, args.batch_size, args.learning_rate,
-                args.beta1, args.nz, not args.nogui, args.load_model)
+    gan = dcgan(generator, discriminator, args.epochs, dataloader, model_name, args.channels, device,
+                args.batch_size, args.learning_rate, args.beta1,
+                args.nz, not args.nogui, args.load_model)
 
     if args.load_model is None:
         gan.train()
