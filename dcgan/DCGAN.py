@@ -84,8 +84,8 @@ class DCGAN:
                 netD_loss_real.backward()
 
                 # Testing discriminator on fake samples
-                noise = torch.randn(real_samples.size(
-                    0), self.nz, 1, 1, device=self.device)
+                noise = torch.randn(real_samples.size(0), self.nz, 1, 1,
+                                    device=self.device)
                 # fake bact of samples created with generator
                 fake_samples = self.generator(noise)
                 labels_fake = torch.full((real_samples.size(0),), Label.fake_label.value,
@@ -113,26 +113,29 @@ class DCGAN:
                 self.optim_gen.step()
 
                 # Print and save losses and generated images
-                if i % 50 == 0:
+                iterator = 0
+                if iterator % 50 == 0:
                     print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f'
                           % (epoch, self.num_epochs, i, len(self.dataloader),
                              netD_loss.item(), netG_loss.item()))
 
-                if ((i + 1) % 500 == 0) or ((epoch == self.num_epochs - 1) and (i == len(self.dataloader) - 1)):
+                if ((iterator + 1) % 500 == 0) or ((epoch == self.num_epochs - 1) and (i == len(self.dataloader) - 1)):
                     self.generator.eval()
                     with torch.no_grad():
                         fake = self.generator(fixed_noise).detach().cpu()
                     img_list.append(vutils.make_grid(
                         fake, padding=2, normalize=True))
                     if self.visualize:
-                        print_epoch_images(self.dataloader, img_list)
+                        print_epoch_images(self.dataloader, img_list, iterator)
+                    iterator += 1
 
                 # save loss of both D(x) and G(x) for further visualization
                 D_losses.append(netD_loss.item())
                 G_losses.append(netG_loss.item())
 
     def save_model(self):
-        PATH = f'./{self.model_name}/saved-model.pt'
+        print(f'Saving mode: {self.model_name}')
+        PATH = f'datasets/model/{self.model_name}.pt'
 
         torch.save({
             "discriminator": self.discriminator.state_dict(),
@@ -142,7 +145,7 @@ class DCGAN:
         }, PATH)
 
     def load_model(self):
-        PATH = f'./{self.model_name}/saved-model.pt'
+        PATH = f'datasets/model/{self.model_name}.pt'
         checkpoint = torch.load(PATH)
 
         self.discriminator.load_state_dict(checkpoint["discriminator"])
