@@ -116,7 +116,7 @@ class DCGAN:
                 self.optim_gen.step()
 
                 # Print and save losses and generated images
-                if itr % 50 == 0:
+                if i % 50 == 0:
                     print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f'
                           % (epoch, self.num_epochs, i, len(self.dataloader),
                              netD_loss.item(), netG_loss.item()))
