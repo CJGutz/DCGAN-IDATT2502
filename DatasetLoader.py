@@ -1,5 +1,4 @@
 import torch
-import os
 import zipfile
 from torchvision.transforms import transforms
 import torchvision.datasets as dset
