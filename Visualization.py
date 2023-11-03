@@ -1,3 +1,5 @@
+import math
+
 import matplotlib.pyplot as plt
 import numpy as np
 import torchvision.utils as vutils
@@ -33,7 +35,7 @@ def print_epoch_images(dataloader, img_list, epoch, num_epochs, itr, data_len, g
     plt.axis("off")
     plt.title("Fake Images")
     plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
-    plt.savefig(f"datasets/figures/epoch_fig[{num_epochs}/{epoch}][{itr}/{data_len}].png")
+    plt.savefig(f"datasets/figures/epoch_fig[{num_epochs}/{epoch}][{itr}/{math.floor(data_len)}].png")
     plt.close()
 
 
