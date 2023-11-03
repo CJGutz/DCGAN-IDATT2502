@@ -1,4 +1,6 @@
 import torch
+import sys
+import signal
 import argparse
 from Visualization import print_start_img
 from dcgan.DCGAN import DCGAN as dcgan
@@ -26,8 +28,7 @@ def run():
                         help="generator features")
     parser.add_argument("--nz", default=100, type=int,
                         help="generator noise size")
-    parser.add_argument("--nogui", action="store_true", default=False)
-    parser.add_argument("--load_model", default=None, type=bool)
+    parser.add_argument("--load_model", action="store_true", default=False)
 
     args = parser.parse_args()
 
@@ -46,21 +47,30 @@ def run():
 
     # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (
-            torch.cuda.is_available() and gpu_count > 0) else "cpu")
-
-    device = "cpu"
+        torch.cuda.is_available() and gpu_count > 0) else "cpu")
     # Create an instance of discriminator and generator
-    generator = Generator(args.nz, args.ngf, args.channels, args.layers).to(device)
-    discriminator = Discriminator(args.channels, args.ndf, args.layers).to(device)
-
+    generator = Generator(args.nz, args.ngf, args.channels,
+                          args.layers).to(device)
+    discriminator = Discriminator(
+        args.channels, args.ndf, args.layers).to(device)
     # Create an instance of the dcgan
     gan = dcgan(generator, discriminator, args.epochs, dataloader, model_name, args.channels, device,
                 args.batch_size, args.learning_rate, args.beta1,
-                args.nz, not args.nogui, args.load_model)
+                args.nz, args.load_model)
 
-    gan.train()
-    if args.load_model is None:
+    def tear_down(signal, frame):
+        print(f"Saving model {model_name}")
         gan.save_model()
+        print("Model saved")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, tear_down)
+    try:
+        gan.train()
+    except Exception as e:
+        print(e)
+
+    tear_down(None, None)
 
 
 if __name__ == "__main__":

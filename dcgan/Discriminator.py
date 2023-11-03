@@ -9,13 +9,13 @@ class Discriminator(nn.Module):
                  **kwargs):
         super().__init__(**kwargs)
 
-        self.main = nn.Sequential(
+        layers = [
             nn.Conv2d(numb_color_channels, ndf,
                       kernel_size=4, stride=2, padding=1, bias=False),
             nn.LeakyReLU(0.2, inplace=True)
-        )
+        ]
         for i in range(number_of_layers):
-            self.main.extend(
+            layers.extend(
                 [
                     nn.Conv2d(ndf * 2 ** i,
                               ndf * 2 ** (i + 1),
@@ -28,11 +28,13 @@ class Discriminator(nn.Module):
                 ]
             )
 
-        self.main.append(nn.Conv2d(ndf * 2 ** number_of_layers, 1,
-                                   kernel_size=4, stride=1, padding=0))
-        self.main.append(nn.LeakyReLU(0.2, inplace=True))
-        self.main.append(nn.Flatten())
-        self.main.append(nn.Sigmoid())
+        layers.append(nn.Conv2d(ndf * 2 ** number_of_layers, 1,
+                                kernel_size=4, stride=1, padding=0))
+        layers.append(nn.LeakyReLU(0.2, inplace=True))
+        layers.append(nn.Flatten())
+        layers.append(nn.Sigmoid())
+
+        self.main = nn.Sequential(*layers)
 
     def forward(self, x):
         return self.main(x)
