@@ -1,4 +1,6 @@
 import torch
+import sys
+import signal
 import argparse
 from Visualization import print_start_img
 from dcgan.DCGAN import DCGAN as dcgan
@@ -46,19 +48,28 @@ def run():
 
     # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (
-            torch.cuda.is_available() and gpu_count > 0) else "cpu")
+        torch.cuda.is_available() and gpu_count > 0) else "cpu")
     # Create an instance of discriminator and generator
-    generator = Generator(args.nz, args.ngf, args.channels, args.layers).to(device)
-    discriminator = Discriminator(args.channels, args.ndf, args.layers).to(device)
-
+    generator = Generator(args.nz, args.ngf, args.channels,
+                          args.layers).to(device)
+    discriminator = Discriminator(
+        args.channels, args.ndf, args.layers).to(device)
     # Create an instance of the dcgan
     gan = dcgan(generator, discriminator, args.epochs, dataloader, model_name, args.channels, device,
                 args.batch_size, args.learning_rate, args.beta1,
                 args.nz, not args.nogui, args.load_model)
 
-    if args.load_model is None:
-        gan.train()
+    def interrupt_handler(signal, frame):
+
+        print("Interrupted")
         gan.save_model()
+        print("Model saved")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, interrupt_handler)
+
+    gan.train()
+    gan.save_model()
 
 
 if __name__ == "__main__":
