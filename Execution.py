@@ -42,8 +42,7 @@ def run():
 
     dataloader, model_name = data_loader(
         args.dataset, args.img_size, args.batch_size, args.channels)
-    if not args.nogui:
-        print_start_img(dataloader)
+    print_start_img(dataloader)
 
     # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (
