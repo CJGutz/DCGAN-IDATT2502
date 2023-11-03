@@ -11,18 +11,18 @@ class Generator(nn.Module):
                  **kwargs):
         super().__init__(**kwargs)
 
-        self.main = nn.Sequential(
+        layers = [
             nn.ConvTranspose2d(noise,
                                ngf * 8,
                                kernel_size=4, stride=1, padding=0, bias=False),
             nn.BatchNorm2d(ngf * 8),
             nn.ReLU(inplace=True),
-        )
+        ]
 
         current_channels = ngf * 8
 
-        for i in range(number_of_layers):
-            self.main.extend(
+        for _ in range(number_of_layers):
+            layers.extend(
                 [
                     nn.ConvTranspose2d(current_channels,
                                        current_channels // 2,
@@ -33,11 +33,13 @@ class Generator(nn.Module):
             )
             current_channels //= 2
 
-        self.main.add_module('conv_out',
-                             nn.ConvTranspose2d(current_channels,
-                                                numb_color_channels,
-                                                kernel_size=4, stride=2, padding=1, bias=False))
-        self.main.add_module('tanh', nn.Tanh())
+        layers.append(
+            nn.ConvTranspose2d(current_channels,
+                               numb_color_channels,
+                               kernel_size=4, stride=2, padding=1, bias=False))
+        layers.append(nn.Tanh())
+
+        self.main = nn.Sequential(*layers)
 
     def forward(self, x):
         return self.main(x)
