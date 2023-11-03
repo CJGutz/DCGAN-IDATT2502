@@ -124,7 +124,8 @@ class DCGAN:
                     img_list.append(vutils.make_grid(
                         fake, padding=2, normalize=True))
                     if self.visualize:
-                        print_epoch_images(self.dataloader, img_list, (itr + 1) / 500)
+                        print_epoch_images(self.dataloader, img_list,
+                                           epoch, self.num_epochs, (itr+1)/500, len(self.dataloader))
                 itr += 1
 
                 # save loss of both D(x) and G(x) for further visualization

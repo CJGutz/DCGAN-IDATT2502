@@ -29,7 +29,9 @@ class Discriminator(nn.Module):
             )
 
         self.main.append(nn.Conv2d(ndf * 2 ** number_of_layers, 1,
-                                   kernel_size=4, stride=1, padding=0))  # Modified this line
+                                   kernel_size=4, stride=1, padding=0))
+        self.main.append(nn.LeakyReLU(0.2, inplace=True))
+        self.main.append(nn.Flatten())
         self.main.append(nn.Sigmoid())
 
     def forward(self, x):
