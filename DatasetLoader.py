@@ -26,7 +26,8 @@ def data_loader(dataset_path, image_size, batch_size, channels, dataset_dir="./d
 
     transform = transforms.Compose(
         [transforms.Resize(image_size),
-            transforms.ToTensor(),
+         transforms.CenterCrop(image_size),
+         transforms.ToTensor(),
          transforms.Normalize(normalization_args, normalization_args)
          ])
 

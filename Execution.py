@@ -1,6 +1,5 @@
 import torch
 import argparse
-
 from Visualization import print_start_img
 from dcgan.DCGAN import DCGAN as dcgan
 from dcgan.Discriminator import Discriminator
