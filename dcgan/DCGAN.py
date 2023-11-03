@@ -108,6 +108,7 @@ class DCGAN:
                 # train netG
                 self.generator.zero_grad()
                 labels.fill_(Label.real_label.value)
+
                 # loss of generator
                 netG_output = self.discriminator(fake_samples).view(-1)
                 netG_loss = criterion(netG_output, labels)
@@ -130,7 +131,7 @@ class DCGAN:
                     img_list.append(vutils.make_grid(
                         fake, padding=2, normalize=True))
                     print_epoch_images(self.dataloader, img_list,
-                                       epoch, self.num_epochs, (i+1)/500, len(self.dataloader)/500)
+                                       epoch, self.num_epochs, (i + 1) / 500, len(self.dataloader) / 500)
 
                 # save loss of both D(x) and G(x) for further visualization
                 D_losses.append(netD_loss.item())
