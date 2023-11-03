@@ -47,6 +47,8 @@ def run():
     # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (
             torch.cuda.is_available() and gpu_count > 0) else "cpu")
+
+    device = "cpu"
     # Create an instance of discriminator and generator
     generator = Generator(args.nz, args.ngf, args.channels, args.layers).to(device)
     discriminator = Discriminator(args.channels, args.ndf, args.layers).to(device)
@@ -56,8 +58,8 @@ def run():
                 args.batch_size, args.learning_rate, args.beta1,
                 args.nz, not args.nogui, args.load_model)
 
+    gan.train()
     if args.load_model is None:
-        gan.train()
         gan.save_model()
 
 

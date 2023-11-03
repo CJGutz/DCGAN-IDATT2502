@@ -71,7 +71,6 @@ class DCGAN:
         img_list = []
         G_losses = []
         D_losses = []
-        itr = 0
 
         for epoch in range(self.num_epochs):
             for i, data_batch in enumerate(self.dataloader, 0):
@@ -122,7 +121,7 @@ class DCGAN:
                              netD_loss.item(), netG_loss.item()))
 
                 # if statement used for printing images
-                if ((itr + 1) % 500 == 0) or ((epoch == self.num_epochs - 1) and (i == len(self.dataloader) - 1)):
+                if ((i + 1) % 500 == 0) or ((epoch == self.num_epochs - 1) and (i == len(self.dataloader) - 1)):
                     self.generator.eval()
                     with torch.no_grad():
                         fake = self.generator(fixed_noise).detach().cpu()
@@ -130,8 +129,8 @@ class DCGAN:
                         fake, padding=2, normalize=True))
                     if self.visualize:
                         print_epoch_images(self.dataloader, img_list,
-                                           epoch, self.num_epochs, (itr+1)/500, len(self.dataloader)/500)
-                itr += 1
+                                           epoch, self.num_epochs, (i+1)/500, len(self.dataloader)/500)
+                i += 1
 
                 # save loss of both D(x) and G(x) for further visualization
                 D_losses.append(netD_loss.item())
