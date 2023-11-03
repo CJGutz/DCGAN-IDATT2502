@@ -28,7 +28,7 @@ def run():
                         help="generator features")
     parser.add_argument("--nz", default=100, type=int,
                         help="generator noise size")
-    parser.add_argument("--load_model", action="store_true", default=False)
+    parser.add_argument("--load_model", action="store_false", default=False)
 
     args = parser.parse_args()
 
@@ -42,8 +42,7 @@ def run():
 
     dataloader, model_name = data_loader(
         args.dataset, args.img_size, args.batch_size, args.channels)
-    if not args.nogui:
-        print_start_img(dataloader)
+    print_start_img(dataloader)
 
     # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (

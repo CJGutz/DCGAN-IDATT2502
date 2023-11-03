@@ -149,6 +149,9 @@ class DCGAN:
 
     def load_model(self):
         PATH = os.path.join("datasets", "model", self.model_name + ".pt")
+        if not os.path.isfile(PATH):
+            print("No model found")
+            return
         checkpoint = torch.load(PATH)
 
         self.discriminator.load_state_dict(checkpoint["discriminator"])
