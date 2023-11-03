@@ -16,8 +16,7 @@ def print_start_img(dataloader, grid_imgs=(8, 5), title="Starting Images"):
         image_batch[0][:grid_imgs[0] * grid_imgs[1]],
         padding=2, normalize=True), (1, 2, 0)))
 
-    path = os.path.join("datasets", "figures", "start_fig.png")
-    plt.savefig(path)
+    plt.savefig(os.path.join("datasets", "figures", "start_fig.png"))
     plt.close()
 
 
