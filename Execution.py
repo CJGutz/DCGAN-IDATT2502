@@ -28,8 +28,7 @@ def run():
                         help="generator features")
     parser.add_argument("--nz", default=100, type=int,
                         help="generator noise size")
-    parser.add_argument("--nogui", action="store_true", default=False)
-    parser.add_argument("--load_model", default=None, type=bool)
+    parser.add_argument("--load_model", action="store_true", default=False)
 
     args = parser.parse_args()
 
@@ -57,19 +56,21 @@ def run():
     # Create an instance of the dcgan
     gan = dcgan(generator, discriminator, args.epochs, dataloader, model_name, args.channels, device,
                 args.batch_size, args.learning_rate, args.beta1,
-                args.nz, not args.nogui, args.load_model)
+                args.nz, args.load_model)
 
-    def interrupt_handler(signal, frame):
-
-        print("Interrupted")
+    def tear_down(signal, frame):
+        print(f"Saving model {model_name}")
         gan.save_model()
         print("Model saved")
         sys.exit(0)
 
-    signal.signal(signal.SIGINT, interrupt_handler)
+    signal.signal(signal.SIGINT, tear_down)
+    try:
+        gan.train()
+    except Exception as e:
+        print(e)
 
-    gan.train()
-    gan.save_model()
+    tear_down(None, None)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,5 @@
 import torch
+import os
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.utils as vutils
@@ -24,7 +25,7 @@ def weights(model):
 
 class DCGAN:
     def __init__(self, generator, discriminator, num_epochs, dataloader, model_name, nc, device,
-                 batch_size=128, lr=0.0002, beta1=0.5, nz=100, visualize=True, load=None):
+                 batch_size=128, lr=0.0002, beta1=0.5, nz=100, load=None):
         super(DCGAN, self).__init__()
 
         self.device = device
@@ -48,7 +49,6 @@ class DCGAN:
         self.dataloader = dataloader
         self.nz = nz
         self.numb_channels = nc
-        self.visualize = visualize
 
         if load is not None:
             self.load_model()
@@ -71,7 +71,6 @@ class DCGAN:
         img_list = []
         G_losses = []
         D_losses = []
-        itr = 0
 
         for epoch in range(self.num_epochs):
             for i, data_batch in enumerate(self.dataloader, 0):
@@ -84,7 +83,8 @@ class DCGAN:
                                     dtype=torch.float, device=self.device)
 
                 # calculate the loss and predicted value from real samples
-                netD_predictions_real = self.discriminator(real_samples).view(-1)
+                netD_predictions_real = self.discriminator(
+                    real_samples).view(-1)
                 netD_loss_real = criterion(netD_predictions_real, labels)
                 netD_loss_real.backward()
 
@@ -96,7 +96,8 @@ class DCGAN:
                 labels.fill_(Label.fake_label.value)
 
                 # calculate the predicted value and loss from fake samples
-                netD_predictions_fake = self.discriminator(fake_samples.detach()).view(-1)
+                netD_predictions_fake = self.discriminator(
+                    fake_samples.detach()).view(-1)
                 netD_loss_fake = criterion(netD_predictions_fake, labels)
                 netD_loss_fake.backward()
 
@@ -122,24 +123,21 @@ class DCGAN:
                              netD_loss.item(), netG_loss.item()))
 
                 # if statement used for printing images
-                if ((itr + 1) % 500 == 0) or ((epoch == self.num_epochs - 1) and (i == len(self.dataloader) - 1)):
+                if ((i + 1) % 500 == 0) or ((epoch == self.num_epochs - 1) and (i == len(self.dataloader) - 1)):
                     self.generator.eval()
                     with torch.no_grad():
                         fake = self.generator(fixed_noise).detach().cpu()
                     img_list.append(vutils.make_grid(
                         fake, padding=2, normalize=True))
-                    if self.visualize:
-                        print_epoch_images(self.dataloader, img_list,
-                                           epoch, self.num_epochs, (itr+1)/500, len(self.dataloader)/500)
-                itr += 1
+                    print_epoch_images(self.dataloader, img_list,
+                                       epoch, self.num_epochs, (i+1)/500, len(self.dataloader)/500)
 
                 # save loss of both D(x) and G(x) for further visualization
                 D_losses.append(netD_loss.item())
                 G_losses.append(netG_loss.item())
 
     def save_model(self):
-        print(f'Saving mode: {self.model_name}')
-        PATH = f'datasets/model/{self.model_name}.pt'
+        PATH = os.path.join("datasets", "model", self.model_name + ".pt")
 
         torch.save({
             "discriminator": self.discriminator.state_dict(),
@@ -149,7 +147,7 @@ class DCGAN:
         }, PATH)
 
     def load_model(self):
-        PATH = f'datasets/model/{self.model_name}.pt'
+        PATH = os.path.join("datasets", "model", self.model_name + ".pt")
         checkpoint = torch.load(PATH)
 
         self.discriminator.load_state_dict(checkpoint["discriminator"])

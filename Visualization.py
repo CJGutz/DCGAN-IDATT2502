@@ -1,3 +1,4 @@
+import os
 import math
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,7 +16,8 @@ def print_start_img(dataloader, grid_imgs=(8, 5), title="Starting Images"):
         image_batch[0][:grid_imgs[0] * grid_imgs[1]],
         padding=2, normalize=True), (1, 2, 0)))
 
-    plt.savefig("datasets/figures/start_fig.png")
+    path = os.path.join("datasets", "figures", "start_fig.png")
+    plt.savefig(path)
     plt.close()
 
 
@@ -34,7 +36,9 @@ def print_epoch_images(dataloader, img_list, epoch, num_epochs, itr, data_len, g
     plt.axis("off")
     plt.title("Fake Images")
     plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
-    plt.savefig(f"datasets/figures/epoch_fig[{num_epochs}/{epoch}][{itr}/{math.floor(data_len)}].png")
+
+    plt.savefig(os.path.join("datasets", "figures",
+                f"epoch_fig-epoch{epoch}-{num_epochs}-itr{math.floor(itr)}-{math.floor(data_len)}.png"))
     plt.close()
 
 
@@ -47,5 +51,5 @@ def print_loss(G_loss, D_loss):
     plt.xlabel("Iters")
     plt.ylabel("Loss")
     plt.legend()
-    plt.savefig("datasets/figures/GDLoss_fig.png")
+    plt.savefig(os.path.join("datasets", "figures", "loss_fig.png"))
     plt.close()
