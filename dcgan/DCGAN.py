@@ -29,14 +29,19 @@ class DCGAN:
 
         self.device = device
         self.model_name = model_name
+
         self.generator = generator.apply(
             weights)
         self.discriminator = discriminator.apply(
             weights)
         self.optim_gen = optim.Adam(
-            generator.parameters(), lr=lr, betas=(beta1, 0.999))
+            generator.parameters(),
+            lr=lr, betas=(beta1, 0.999))
+
         self.optim_disc = optim.Adam(
-            discriminator.parameters(), lr=lr, betas=(beta1, 0.999))
+            discriminator.parameters(),
+            lr=lr, betas=(beta1, 0.999))
+
         self.batch_size = batch_size
         self.lr = lr
         self.num_epochs = num_epochs
@@ -50,7 +55,7 @@ class DCGAN:
 
     def pre_training(self):
         # Create batch of latent vectors that we will use to visualize
-        #  the progression of the generator
+        # the progression of the generator
         fixed_noise = torch.randn(64, self.nz, 1, 1, device=self.device)
 
         # Hyperparams
@@ -125,7 +130,7 @@ class DCGAN:
                         fake, padding=2, normalize=True))
                     if self.visualize:
                         print_epoch_images(self.dataloader, img_list,
-                                           epoch, self.num_epochs, (itr+1)/500, len(self.dataloader))
+                                           epoch, self.num_epochs, (itr+1)/500, len(self.dataloader)/500)
                 itr += 1
 
                 # save loss of both D(x) and G(x) for further visualization
