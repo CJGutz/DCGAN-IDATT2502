@@ -30,8 +30,6 @@ class Discriminator(nn.Module):
 
         layers.append(nn.Conv2d(ndf * 2 ** number_of_layers, 1,
                                 kernel_size=4, stride=1, padding=0))
-        layers.append(nn.LeakyReLU(0.2, inplace=True))
-        layers.append(nn.Flatten())
         layers.append(nn.Sigmoid())
 
         self.main = nn.Sequential(*layers)
