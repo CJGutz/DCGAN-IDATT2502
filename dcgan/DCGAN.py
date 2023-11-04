@@ -25,7 +25,7 @@ def weights(model):
 
 class DCGAN:
     def __init__(self, generator, discriminator, num_epochs, dataloader, model_name, nc, device,
-                 batch_size=128, lr=0.0002, beta1=0.5, nz=100, load=None):
+                 batch_size=128, lr=0.0002, beta1=0.5, nz=100, load=False):
         super(DCGAN, self).__init__()
 
         self.device = device
@@ -50,7 +50,7 @@ class DCGAN:
         self.nz = nz
         self.numb_channels = nc
 
-        if load is not None:
+        if load:
             self.load_model()
 
     def pre_training(self):

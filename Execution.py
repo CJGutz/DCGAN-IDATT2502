@@ -28,7 +28,7 @@ def run():
                         help="generator features")
     parser.add_argument("--nz", default=100, type=int,
                         help="generator noise size")
-    parser.add_argument("--load_model", action="store_false", default=False)
+    parser.add_argument("--load-model", action="store_false", default=False)
 
     args = parser.parse_args()
 
