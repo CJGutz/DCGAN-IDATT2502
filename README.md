@@ -19,8 +19,13 @@ To train a DCGAN model with the given default values you run.
 It is also possible to train other models.
 Find available models in [Entrypoint.py](./Entrypoint.py)
 
+Remember to save and load models if you want to persist your training.
+The models will be saved even if an error occurrs in the training or if you shut the training down yourself.
+```console
+   python3 Entrypoint.py dcgan MNIST --channels 1 --load-model --save-model
+```
 
-# Datasets
+## Datasets
 
 Set your preferred dataset directory or zip path as the argument to use it.
 If you want to use a dataset from torchvision, you can see the [DatasetLoader.py](./DatasetLoader.py) file
@@ -28,5 +33,5 @@ for a list of supported datasets. Just use the name of the dataset as the argume
 
 Example Script: 
 ```console
-    python3 Execution.py datasets/celeba-dataset -c 3 -i 64 -l 3 -b 128 -e 5 -lr 0.0002 -b1 0.5 --ndf 64 --ngf 64 --nz 100
- ```
+python3 Entrypoint.py dcgan datasets/celeba-dataset -c 3 -i 64 -l 3 -b 128 -e 5 -lr 0.0002 -b1 0.5 --ndf 64 --ngf 64 --nz 100
+```
