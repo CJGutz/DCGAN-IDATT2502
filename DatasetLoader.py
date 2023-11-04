@@ -1,9 +1,8 @@
 import torch
-import os
 import zipfile
 from torchvision.transforms import transforms
 import torchvision.datasets as dset
-
+import os
 from tqdm import tqdm
 
 
@@ -22,12 +21,12 @@ def download_and_extract_zip(zip_file_path, extract_path):
 
 
 def data_loader(dataset_path, image_size, batch_size, channels, dataset_dir="./datasets"):
-
     normalization_args = list((0.5 for _ in range(channels)))
 
     transform = transforms.Compose(
         [transforms.Resize(image_size),
-            transforms.ToTensor(),
+         transforms.CenterCrop(image_size),
+         transforms.ToTensor(),
          transforms.Normalize(normalization_args, normalization_args)
          ])
 
@@ -35,6 +34,7 @@ def data_loader(dataset_path, image_size, batch_size, channels, dataset_dir="./d
         dataset = VISION_DATASETS[dataset_path]
         dataset = dataset(root=dataset_dir, train=True,
                           transform=transform, download=True,)
+        model_name = dataset_path
     else:
         if dataset_path.endswith('.zip'):
             zip_path = dataset_path
@@ -43,8 +43,11 @@ def data_loader(dataset_path, image_size, batch_size, channels, dataset_dir="./d
                 zip_path, dataset_path)
 
         dataset = dset.ImageFolder(root=dataset_path, transform=transform)
+        model_name = os.path.basename(dataset_path)
+        if not model_name:
+            model_name = os.path.basename(os.path.dirname(dataset_path))
 
     dataloader = torch.utils.data.DataLoader(
         dataset, batch_size=batch_size, shuffle=True)
 
-    return dataloader
+    return dataloader, model_name

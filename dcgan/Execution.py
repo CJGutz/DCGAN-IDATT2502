@@ -1,15 +1,15 @@
 import torch
+import sys
+import signal
 import argparse
-
 from Visualization import print_start_img
 from dcgan.DCGAN import DCGAN as dcgan
-from dcgan.Discriminator import Discriminator as netD
-from dcgan.Generator import Generator as netG
+from dcgan.Discriminator import Discriminator
+from dcgan.Generator import Generator
 from DatasetLoader import data_loader
 
 
 def run():
-
     parser = argparse.ArgumentParser(
         prog="DCGAN implementation",
     )
@@ -28,7 +28,7 @@ def run():
                         help="generator features")
     parser.add_argument("--nz", default=100, type=int,
                         help="generator noise size")
-    parser.add_argument("--nogui", action="store_true", default=False)
+    parser.add_argument("--load_model", action="store_false", default=False)
 
     args = parser.parse_args()
 
@@ -40,25 +40,36 @@ def run():
         gpu_count = 0
         print("CUDA not available")
 
-    dataloader = data_loader(
+    dataloader, model_name = data_loader(
         args.dataset, args.img_size, args.batch_size, args.channels)
-    if not args.nogui:
-        print_start_img(dataloader)
+    print_start_img(dataloader)
 
     # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (
         torch.cuda.is_available() and gpu_count > 0) else "cpu")
-
     # Create an instance of discriminator and generator
-    generator = netG(args.nz, args.ngf, args.channels, args.layers)
-    discriminator = netD(args.channels, args.ndf, args.layers)
-
+    generator = Generator(args.nz, args.ngf, args.channels,
+                          args.layers).to(device)
+    discriminator = Discriminator(
+        args.channels, args.ndf, args.layers).to(device)
     # Create an instance of the dcgan
-    gan = dcgan(args.epochs, dataloader, args.channels, device, generator,
-                discriminator, args.batch_size, args.learning_rate,
-                args.beta1, args.nz, not args.nogui)
+    gan = dcgan(generator, discriminator, args.epochs, dataloader, model_name, args.channels, device,
+                args.batch_size, args.learning_rate, args.beta1,
+                args.nz, args.load_model)
 
-    gan.train()
+    def tear_down(signal, frame):
+        print(f"Saving model {model_name}")
+        gan.save_model()
+        print("Model saved")
+        sys.exit(0)
+
+    signal.signal(signal.SIGINT, tear_down)
+    try:
+        gan.train()
+    except Exception as e:
+        print(e)
+
+    tear_down(None, None)
 
 
 if __name__ == "__main__":

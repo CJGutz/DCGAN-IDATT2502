@@ -1,3 +1,5 @@
+import os
+import math
 import matplotlib.pyplot as plt
 import numpy as np
 import torchvision.utils as vutils
@@ -13,10 +15,12 @@ def print_start_img(dataloader, grid_imgs=(8, 5), title="Starting Images"):
     plt.imshow(np.transpose(vutils.make_grid(
         image_batch[0][:grid_imgs[0] * grid_imgs[1]],
         padding=2, normalize=True), (1, 2, 0)))
-    plt.show()
+
+    plt.savefig(os.path.join("datasets", "figures", "start_fig.png"))
+    plt.close()
 
 
-def print_epoch_images(dataloader, img_list, grid_imgs=(8, 5)):
+def print_epoch_images(dataloader, img_list, epoch, num_epochs, itr, data_len, grid_imgs=(8, 8)):
     real_batch = next(iter(dataloader))
 
     plt.figure(figsize=(12, 12))
@@ -30,9 +34,11 @@ def print_epoch_images(dataloader, img_list, grid_imgs=(8, 5)):
     plt.subplot(1, 2, 2)
     plt.axis("off")
     plt.title("Fake Images")
-    # potentially image_list[-1]
-    plt.imshow(np.transpose(img_list, (1, 2, 0)))
-    plt.show()
+    plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
+
+    plt.savefig(os.path.join("datasets", "figures",
+                f"epoch_fig-epoch{epoch}-{num_epochs}-itr{math.floor(itr)}-{math.floor(data_len)}.png"))
+    plt.close()
 
 
 # method that shows Generator and Discriminator loss during training
@@ -44,4 +50,5 @@ def print_loss(G_loss, D_loss):
     plt.xlabel("Iters")
     plt.ylabel("Loss")
     plt.legend()
-    plt.show()
+    plt.savefig(os.path.join("datasets", "figures", "loss_fig.png"))
+    plt.close()
