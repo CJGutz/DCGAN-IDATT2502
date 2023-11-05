@@ -2,7 +2,7 @@ import torch
 import sys
 import signal
 import argparse
-from Visualization import print_start_img
+from Visualization import IterationValues, SubFigure, print_start_img, plot_iteration_values
 from dcgan.DCGAN import DCGAN as dcgan
 from dcgan.Discriminator import Discriminator
 from dcgan.Generator import Generator
@@ -62,6 +62,15 @@ def run(cli_args):
         if not args.no_model_save:
             print(f"Saving model {model_name}")
             gan.save_model()
+            plot_iteration_values(
+                SubFigure("Loss", [
+                    IterationValues("G(x)", gan.G_losses),
+                    IterationValues("D(x)", gan.D_losses)]),
+                SubFigure("Accuracy", [
+                    IterationValues("G(x)", gan.G_accuracies),
+                    IterationValues("D(x)", gan.D_accuracies)]),
+                title="Loss and Accuracy",
+                file_name=f"{model_name}-accuracy-loss.png")
             print("Model saved")
         sys.exit(0)
 

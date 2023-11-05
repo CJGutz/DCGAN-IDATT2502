@@ -45,8 +45,8 @@ def print_epoch_images(dataloader, img_list, epoch, num_epochs, itr, data_len, g
 
 @dataclass
 class IterationValues:
-    values: list
     label: str
+    values: list
 
 
 @dataclass
