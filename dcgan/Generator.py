@@ -43,3 +43,6 @@ class Generator(nn.Module):
 
     def forward(self, x):
         return self.main(x)
+
+    def accuracy(self, x, y):
+        return torch.mean(torch.less(torch.abs(x - y), 0.5).float())
