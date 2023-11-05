@@ -1,4 +1,6 @@
+from dataclasses import dataclass
 import os
+from typing import Tuple, List
 import math
 import matplotlib.pyplot as plt
 import numpy as np
@@ -41,14 +43,39 @@ def print_epoch_images(dataloader, img_list, epoch, num_epochs, itr, data_len, g
     plt.close()
 
 
-# method that shows Generator and Discriminator loss during training
-def print_loss(G_loss, D_loss):
-    plt.figure(figsize=(10, 5))
-    plt.title("Generator and Discriminator Loss")
-    plt.plot(G_loss, label="G(x)")
-    plt.plot(D_loss, label="D(x)")
-    plt.xlabel("Iters")
-    plt.ylabel("Loss")
-    plt.legend()
-    plt.savefig(os.path.join("datasets", "figures", "loss_fig.png"))
-    plt.close()
+@dataclass
+class IterationValues:
+    values: list
+    label: str
+
+
+@dataclass
+class SubFigure:
+    y_label: str
+    values_labels: List[IterationValues]
+
+
+def plot_iteration_values(
+    *graphs: SubFigure,
+    title="Iteration values",
+    file_name="iteration_values.png"
+):
+    """Creates subplots for to visualize simple graphs
+
+    Args:
+        graphs (SubFigure): SubFigure objects that contain the values
+        and labels for the graphs
+    """
+    _, axes = plt.subplots(len(graphs), figsize=(10, 10))
+
+    plt.title(title)
+    for count, sub_figure in enumerate(graphs):
+        ax = axes[count]
+        for plots in sub_figure.values_labels:
+            ax.plot(plots.values, label=plots.label)
+        ax.set_xlabel("Iterations")
+        ax.set_ylabel(sub_figure.y_label)
+        ax.legend()
+    plt.tight_layout()
+    plt.axis("on")
+    plt.savefig(os.path.join("datasets", "figures", file_name))
