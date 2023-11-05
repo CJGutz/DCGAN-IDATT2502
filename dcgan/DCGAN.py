@@ -136,15 +136,21 @@ class DCGAN:
                     print_epoch_images(self.dataloader, img_list,
                                        epoch, self.num_epochs, (i + 1) / 500, len(self.dataloader) / 500)
 
-                # save loss of both D(x) and G(x) for further visualization
+                # save loss and accuracy of both D(x) and G(x) for further visualization
                 self.D_losses.append(netD_loss.item())
                 self.G_losses.append(netG_loss.item())
                 self.D_accuracies.append((
-                    (self.discriminator.accuracy(netD_predictions_real, labels_real)
-                        + self.discriminator.accuracy(netD_predictions_fake, labels_fake)
+                    (self.discriminator.accuracy(
+                        netD_predictions_real,
+                        labels.fill_(Label.real_label.value))
+                        + self.discriminator.accuracy(
+                            netD_predictions_fake,
+                        labels.fill_(Label.fake_label.value))
                      ) / 2).item())
                 self.G_accuracies.append(
-                    self.generator.accuracy(netG_output, labels_real).item())
+                    self.generator.accuracy(
+                        netG_output, labels.fill_(
+                            Label.real_label.value)).item())
 
     def save_model(self):
         PATH = os.path.join("datasets", "model", self.model_name + ".pt")
