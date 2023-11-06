@@ -22,7 +22,7 @@ def run(cli_args):
     parser.add_argument("-c", "--channels", required=True,
                         type=int, choices=[1, 3])
     parser.add_argument("-i", "--img-size", default=64, type=int)
-    parser.add_argument("-l", "--layers", default=4, type=int)
+    parser.add_argument("-l", "--layers", default=3, type=int)
     parser.add_argument('-b', '--batch-size', default=128, type=int)
     parser.add_argument('-e', '--epochs', default=5, type=int)
     parser.add_argument("-lr", "--learning-rate", default=0.0002, type=float)
