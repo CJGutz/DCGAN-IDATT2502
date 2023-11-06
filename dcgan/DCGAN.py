@@ -50,6 +50,11 @@ class DCGAN:
         self.nz = nz
         self.numb_channels = nc
 
+        self.G_losses = []
+        self.D_losses = []
+        self.G_accuracies = []
+        self.D_accuracies = []
+
         if load:
             self.load_model()
 
@@ -69,8 +74,6 @@ class DCGAN:
          criterion) = self.pre_training()
 
         img_list = []
-        G_losses = []
-        D_losses = []
 
         for epoch in range(self.num_epochs):
             for i, data_batch in enumerate(self.dataloader, 0):
@@ -133,9 +136,21 @@ class DCGAN:
                     print_epoch_images(self.dataloader, img_list,
                                        epoch, self.num_epochs, (i + 1) / 500, len(self.dataloader) / 500)
 
-                # save loss of both D(x) and G(x) for further visualization
-                D_losses.append(netD_loss.item())
-                G_losses.append(netG_loss.item())
+                # save loss and accuracy of both D(x) and G(x) for further visualization
+                self.D_losses.append(netD_loss.item())
+                self.G_losses.append(netG_loss.item())
+                self.D_accuracies.append((
+                    (self.discriminator.accuracy(
+                        netD_predictions_real,
+                        labels.fill_(Label.real_label.value))
+                        + self.discriminator.accuracy(
+                            netD_predictions_fake,
+                        labels.fill_(Label.fake_label.value))
+                     ) / 2).item())
+                self.G_accuracies.append(
+                    self.generator.accuracy(
+                        netG_output, labels.fill_(
+                            Label.real_label.value)).item())
 
     def save_model(self):
         PATH = os.path.join("datasets", "model", self.model_name + ".pt")

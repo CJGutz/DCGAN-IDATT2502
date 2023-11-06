@@ -2,7 +2,12 @@ import torch
 import sys
 import signal
 import argparse
-from Visualization import print_start_img
+from Visualization import (
+    IterationValues,
+    SubFigure,
+    print_start_img,
+    plot_iteration_values
+)
 from dcgan.DCGAN import DCGAN as dcgan
 from dcgan.Discriminator import Discriminator
 from dcgan.Generator import Generator
@@ -54,7 +59,8 @@ def run(cli_args):
     discriminator = Discriminator(
         args.channels, args.ndf, args.layers).to(device)
     # Create an instance of the dcgan
-    gan = dcgan(generator, discriminator, args.epochs, dataloader, model_name, args.channels, device,
+    gan = dcgan(generator, discriminator, args.epochs, dataloader, model_name,
+                args.channels, device,
                 args.batch_size, args.learning_rate, args.beta1,
                 args.nz, args.load_model)
 
@@ -63,6 +69,13 @@ def run(cli_args):
             print(f"Saving model {model_name}")
             gan.save_model()
             print("Model saved")
+        plot_iteration_values(
+            SubFigure("Loss", [IterationValues("G(x)", gan.G_losses),
+                               IterationValues("D(x)", gan.D_losses)]),
+            SubFigure("Accuracy", [IterationValues("G(x)", gan.G_accuracies),
+                                   IterationValues("D(x)", gan.D_accuracies)]),
+            title="Loss and Accuracy",
+            file_name=f"{model_name}-accuracy-loss.png")
         sys.exit(0)
 
     signal.signal(signal.SIGINT, tear_down)
