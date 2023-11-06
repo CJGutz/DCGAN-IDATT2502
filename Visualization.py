@@ -21,22 +21,12 @@ def print_start_img(dataloader, grid_imgs=(8, 5), title="Starting Images"):
     plt.close()
 
 
-def save_img_generated(dataloader, img_list, image_name, grid_imgs=(8, 8)):
-    real_batch = next(iter(dataloader))
+def save_img_generated(img_list, image_name):
 
     plt.figure(figsize=(12, 12))
-    plt.subplot(1, 2, 1)
-    plt.axis("off")
-    plt.title("Real Images")
-    plt.imshow(np.transpose(vutils.make_grid(
-        real_batch[0][:grid_imgs[0] * grid_imgs[1]],
-        padding=2, normalize=True), (1, 2, 0)))
-
-    plt.subplot(1, 2, 2)
-    plt.axis("off")
     plt.title("Fake Images")
     plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
-
+    plt.axis("off")
     plt.savefig(os.path.join("datasets", "figures", image_name))
     plt.close()
 
@@ -73,7 +63,7 @@ def plot_iteration_values(
             ax.plot(plots.values, label=plots.label)
         ax.set_xlabel("Iterations")
         ax.set_ylabel(sub_figure.y_label)
+        ax.grid()
         ax.legend()
     plt.tight_layout()
-    plt.axis("on")
     plt.savefig(os.path.join("datasets", "figures", file_name))

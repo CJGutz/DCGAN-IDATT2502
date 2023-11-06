@@ -154,7 +154,7 @@ class DCGAN:
             fake = self.generator(fixed_noise).detach().cpu()
             self.img_list.append(vutils.make_grid(
                 fake, padding=2, normalize=True))
-            save_img_generated(self.dataloader, self.img_list,
+            save_img_generated(self.img_list,
                                f"fig-epoch{epoch}-{self.num_epochs}"
                                f"-itr{(iteration + 1) // nth_iteration}"
                                f"-{len(self.dataloader) // nth_iteration}.png")
