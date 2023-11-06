@@ -8,9 +8,17 @@ In this project we have developed a **Deep Convolutional Generative Adversarial 
 
 # How to
 
- ```console
-    pip install -r requirements.txt
- ```
+```console
+   pip install -r requirements.txt
+```
+
+To train a DCGAN model with the given default values you run.
+```console
+   python3 Entrypoint.py dcgan MNIST --channels 1
+```
+It is also possible to train other models.
+Find available models in [Entrypoint.py](./Entrypoint.py)
+
 
 # Datasets
 
