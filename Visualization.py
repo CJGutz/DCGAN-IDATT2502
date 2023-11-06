@@ -21,7 +21,7 @@ def print_start_img(dataloader, grid_imgs=(8, 5), title="Starting Images"):
     plt.close()
 
 
-def save_image(dataloader, img_list, image_name, grid_imgs=(8, 8)):
+def save_img_generated(dataloader, img_list, image_name, grid_imgs=(8, 8)):
     real_batch = next(iter(dataloader))
 
     plt.figure(figsize=(12, 12))

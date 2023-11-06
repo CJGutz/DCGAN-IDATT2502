@@ -5,7 +5,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision.utils as vutils
 
-from Visualization import save_image
+from Visualization import save_img_generated
 
 
 class Label:
@@ -75,7 +75,7 @@ class DCGAN:
         (fixed_noise, numb_episodes,
          criterion) = self.pre_training()
 
-        for epoch in range(self.num_epochs):
+        for epoch in range(1, self.num_epochs+1):
             for i, data_batch in enumerate(self.dataloader, 0):
                 # training netG in real_samples
                 self.discriminator.zero_grad()
@@ -127,11 +127,11 @@ class DCGAN:
                              netD_loss.item(), netG_loss.item()))
 
                 # if statement used for printing images
-                third_iteration = len(self.dataloader) // 3
-                if ((i + 1) % third_iteration == 0) or (
-                        (epoch == self.num_epochs - 1) and (i == len(self.dataloader) - 1)):
+                nth_iteration = len(self.dataloader) // 3
+                if ((i + 1) % nth_iteration == 0) or (
+                        (epoch == self.num_epochs) and (i == len(self.dataloader) - 1)):
                     self.save_iteration_images(
-                        fixed_noise, epoch, i, third_iteration)
+                        fixed_noise, epoch, i, nth_iteration)
 
                 # save loss and accuracy of both D(x) and G(x) for further visualization
                 self.D_losses.append(netD_loss.item())
@@ -148,16 +148,16 @@ class DCGAN:
                     self.generator.accuracy(
                         netG_output, labels.fill_(Label.REAL)).item())
 
-    def save_iteration_images(self, fixed_noise, epoch, iteration, third_iteration):
+    def save_iteration_images(self, fixed_noise, epoch, iteration, nth_iteration):
         with torch.no_grad():
             self.generator.eval()
             fake = self.generator(fixed_noise).detach().cpu()
             self.img_list.append(vutils.make_grid(
                 fake, padding=2, normalize=True))
-            save_image(self.dataloader, self.img_list,
-                       f"fig-epoch{epoch}-{self.num_epochs}"
-                       f"-itr{(iteration + 1) // third_iteration}"
-                       f"-{len(self.dataloader) // third_iteration}.png")
+            save_img_generated(self.dataloader, self.img_list,
+                               f"fig-epoch{epoch}-{self.num_epochs}"
+                               f"-itr{(iteration + 1) // nth_iteration}"
+                               f"-{len(self.dataloader) // nth_iteration}.png")
 
     def save_model(self):
         PATH = os.path.join("datasets", "model", self.model_name + ".pt")
