@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 import os
 from typing import List
-import math
 import matplotlib.pyplot as plt
 import numpy as np
 import torchvision.utils as vutils
@@ -22,7 +21,7 @@ def print_start_img(dataloader, grid_imgs=(8, 5), title="Starting Images"):
     plt.close()
 
 
-def save_iteration_image(dataloader, img_list, epoch, num_epochs, itr, data_len, grid_imgs=(8, 8)):
+def save_image(dataloader, img_list, image_name, grid_imgs=(8, 8)):
     real_batch = next(iter(dataloader))
 
     plt.figure(figsize=(12, 12))
@@ -38,8 +37,7 @@ def save_iteration_image(dataloader, img_list, epoch, num_epochs, itr, data_len,
     plt.title("Fake Images")
     plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
 
-    plt.savefig(os.path.join("datasets", "figures",
-                f"fig-epoch{epoch}-{num_epochs}-itr{math.floor(itr)}-{math.floor(data_len)}.png"))
+    plt.savefig(os.path.join("datasets", "figures", image_name))
     plt.close()
 
 

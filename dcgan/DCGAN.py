@@ -1,10 +1,11 @@
 import torch
+import math
 import os
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.utils as vutils
 
-from Visualization import save_iteration_image
+from Visualization import save_image
 
 
 class Label:
@@ -153,10 +154,10 @@ class DCGAN:
             fake = self.generator(fixed_noise).detach().cpu()
             self.img_list.append(vutils.make_grid(
                 fake, padding=2, normalize=True))
-            save_iteration_image(self.dataloader, self.img_list,
-                                 epoch, self.num_epochs,
-                                 (iteration + 1) / third_iteration,
-                                 len(self.dataloader) / third_iteration)
+            save_image(self.dataloader, self.img_list,
+                       f"fig-epoch{epoch}-{self.num_epochs}"
+                       f"-itr{(iteration + 1) // third_iteration}"
+                       f"-{len(self.dataloader) // third_iteration}.png")
 
     def save_model(self):
         PATH = os.path.join("datasets", "model", self.model_name + ".pt")
