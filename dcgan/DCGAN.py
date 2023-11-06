@@ -56,6 +56,7 @@ class DCGAN:
         self.img_list = []
 
         if load:
+            print("loading model")
             self.load_model()
 
     def pre_training(self):

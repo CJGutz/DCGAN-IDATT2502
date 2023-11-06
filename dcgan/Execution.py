@@ -33,8 +33,8 @@ def run(cli_args):
                         help="generator features")
     parser.add_argument("--nz", default=100, type=int,
                         help="generator noise size")
-    parser.add_argument("--load-model", action="store_false", default=False)
-    parser.add_argument("--no-model-save", action="store_false", default=False)
+    parser.add_argument("--load-model", action="store_true", default=False)
+    parser.add_argument("--no-model-save", action="store_true", default=False)
 
     args = parser.parse_args(cli_args)
 
