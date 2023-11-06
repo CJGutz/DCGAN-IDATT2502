@@ -1,9 +1,13 @@
+import numpy as np
 import torch
 import os
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.utils as vutils
+from torchvision.models import inception_v3
+from scipy.stats import entropy
 from enum import Enum
+from numpy import exp, mean
 
 from Visualization import print_epoch_images
 
@@ -54,6 +58,7 @@ class DCGAN:
         self.D_losses = []
         self.G_accuracies = []
         self.D_accuracies = []
+        self.inception_score = []
 
         if load:
             self.load_model()
@@ -76,6 +81,8 @@ class DCGAN:
         img_list = []
 
         for epoch in range(self.num_epochs):
+            self.calc_inception_score()
+
             for i, data_batch in enumerate(self.dataloader, 0):
                 # training netG in real_samples
                 self.discriminator.zero_grad()
@@ -139,18 +146,50 @@ class DCGAN:
                 # save loss and accuracy of both D(x) and G(x) for further visualization
                 self.D_losses.append(netD_loss.item())
                 self.G_losses.append(netG_loss.item())
-                self.D_accuracies.append((
-                    (self.discriminator.accuracy(
+
+                self.D_accuracies.append(
+                    ((self.discriminator.accuracy(
                         netD_predictions_real,
                         labels.fill_(Label.real_label.value))
-                        + self.discriminator.accuracy(
-                            netD_predictions_fake,
-                        labels.fill_(Label.fake_label.value))
-                     ) / 2).item())
+                      + self.discriminator.accuracy(
+                                netD_predictions_fake,
+                                labels.fill_(Label.fake_label.value))
+                      ) / 2).item())
                 self.G_accuracies.append(
                     self.generator.accuracy(
                         netG_output, labels.fill_(
                             Label.real_label.value)).item())
+
+            self.calc_inception_score()
+
+    def calc_inception_score(self, sample_size=100000):
+        samples = []
+        with torch.no_grad():
+            for i in range(sample_size // self.batch_size):
+                noise = torch.randn(self.batch_size, self.nz, 1, 1,
+                                    device=self.device)
+                fake_smpl = self.generator(noise)
+                samples.append(fake_smpl)
+
+        torch.cat(samples, dim=0)
+        inception_model = inception_v3(pretrained=True, transform_input=False).to(self.device)
+        inception_model.eval()
+
+        predictions = []
+        for i in range(len(samples) // self.batch_size):
+            batch = samples[i * self.batch_size: i * self.batch_size + self.batch_size]
+            predictions.append(inception_model(batch).softmax(dim=1).detach().cpu().numpy())
+
+        predictions = np.concatenate(predictions, axis=0)
+        class_distribution = mean(predictions, axis=0)
+
+        kl_divs = []
+        for i in range(predictions.shape[0]):
+            p = predictions[i, :]
+            kl_div = entropy(p, qk=class_distribution)
+            kl_divs.append(kl_div)
+
+        self.inception_score.append(exp(mean(kl_divs)))
 
     def save_model(self):
         PATH = os.path.join("datasets", "model", self.model_name + ".pt")
