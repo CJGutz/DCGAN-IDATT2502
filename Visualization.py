@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import os
-from typing import Tuple, List
+from typing import List
 import math
 import matplotlib.pyplot as plt
 import numpy as np
@@ -22,7 +22,7 @@ def print_start_img(dataloader, grid_imgs=(8, 5), title="Starting Images"):
     plt.close()
 
 
-def print_epoch_images(dataloader, img_list, epoch, num_epochs, itr, data_len, grid_imgs=(8, 8)):
+def save_iteration_image(dataloader, img_list, epoch, num_epochs, itr, data_len, grid_imgs=(8, 8)):
     real_batch = next(iter(dataloader))
 
     plt.figure(figsize=(12, 12))
@@ -39,7 +39,7 @@ def print_epoch_images(dataloader, img_list, epoch, num_epochs, itr, data_len, g
     plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
 
     plt.savefig(os.path.join("datasets", "figures",
-                f"epoch_fig-epoch{epoch}-{num_epochs}-itr{math.floor(itr)}-{math.floor(data_len)}.png"))
+                f"fig-epoch{epoch}-{num_epochs}-itr{math.floor(itr)}-{math.floor(data_len)}.png"))
     plt.close()
 
 

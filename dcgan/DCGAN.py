@@ -4,7 +4,7 @@ import torch.nn as nn
 import torch.optim as optim
 import torchvision.utils as vutils
 
-from Visualization import print_epoch_images
+from Visualization import save_iteration_image
 
 
 class Label:
@@ -125,7 +125,7 @@ class DCGAN:
                              netD_loss.item(), netG_loss.item()))
 
                 # if statement used for printing images
-                third_iteration = int(len(self.dataloader) / 3)
+                third_iteration = len(self.dataloader) // 3
                 if ((i + 1) % third_iteration == 0) or (
                         (epoch == self.num_epochs - 1) and (i == len(self.dataloader) - 1)):
                     self.save_iteration_images(
@@ -152,10 +152,10 @@ class DCGAN:
             fake = self.generator(fixed_noise).detach().cpu()
             self.img_list.append(vutils.make_grid(
                 fake, padding=2, normalize=True))
-            print_epoch_images(self.dataloader, self.img_list,
-                               epoch, self.num_epochs,
-                               (iteration + 1) / third_iteration,
-                               len(self.dataloader) / third_iteration)
+            save_iteration_image(self.dataloader, self.img_list,
+                                 epoch, self.num_epochs,
+                                 (iteration + 1) / third_iteration,
+                                 len(self.dataloader) / third_iteration)
 
     def save_model(self):
         PATH = os.path.join("datasets", "model", self.model_name + ".pt")
