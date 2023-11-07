@@ -13,6 +13,11 @@ class Label:
     FAKE = 0
 
 
+class GAN:
+    LSGAN = "lsgan"
+    DCGAN = "dcgan"
+
+
 # based in the paper by Alec Radford the, the team concluded that the weight should be distributed in this manner
 def weights(model):
     classname = model.__class__.__name__
@@ -24,10 +29,11 @@ def weights(model):
 
 
 class DCGAN:
-    def __init__(self, generator, discriminator, num_epochs, dataloader, model_name, nc, device,
+    def __init__(self, generator, discriminator, num_epochs, dataloader, model_name, nc, device, gan,
                  batch_size=128, lr=0.0002, beta1=0.5, nz=100, load=False):
         super(DCGAN, self).__init__()
 
+        self.gan = gan
         self.device = device
         self.model_name = model_name
 
@@ -67,7 +73,10 @@ class DCGAN:
 
         # Hyperparams
         numb_episodes = len(self.dataloader)
-        criterion = nn.BCELoss().to(self.device)
+        if self.gan == GAN.LSGAN:
+            criterion = nn.MSELoss().to(device=self.device)
+        else:
+            criterion = nn.BCELoss().to(device=self.device)
 
         return fixed_noise, numb_episodes, criterion
 
@@ -105,7 +114,7 @@ class DCGAN:
                 netD_loss_fake.backward()
 
                 # calculate the total loss of discriminator
-                netD_loss = netD_loss_real + netD_loss_fake
+                netD_loss = 0.5*(netD_loss_real + netD_loss_fake)
                 self.optim_disc.step()
 
                 # train netG
@@ -137,13 +146,13 @@ class DCGAN:
                 self.D_losses.append(netD_loss.item())
                 self.G_losses.append(netG_loss.item())
                 self.D_accuracies.append((
-                    (self.discriminator.accuracy(
-                        netD_predictions_real,
-                        labels.fill_(Label.REAL))
-                        + self.discriminator.accuracy(
-                            netD_predictions_fake,
-                        labels.fill_(Label.FAKE))
-                     ) / 2).item())
+                                                 (self.discriminator.accuracy(
+                                                     netD_predictions_real,
+                                                     labels.fill_(Label.REAL))
+                                                  + self.discriminator.accuracy(
+                                                             netD_predictions_fake,
+                                                             labels.fill_(Label.FAKE))
+                                                  ) / 2).item())
                 self.G_accuracies.append(
                     self.generator.accuracy(
                         netG_output, labels.fill_(Label.REAL)).item())
