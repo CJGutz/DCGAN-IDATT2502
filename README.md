@@ -33,5 +33,5 @@ for a list of supported datasets. Just use the name of the dataset as the argume
 
 Example Script: 
 ```console
-python3 Entrypoint.py dcgan datasets/celeba-dataset -c 3 -i 64 -l 3 -b 128 -e 5 -lr 0.0002 -b1 0.5 --ndf 64 --ngf 64 --nz 100
+python3 Entrypoint.py gan datasets/celeba-dataset -g lsgan -c 3 -i 64 -l 3 -b 128 -e 5 -lr 0.0002 -b1 0.5 --ndf 64 --ngf 64 --nz 100
 ```
