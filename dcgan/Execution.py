@@ -9,8 +9,10 @@ from Visualization import (
     plot_iteration_values
 )
 from dcgan.DCGAN import DCGAN as dcgan
-from dcgan.Discriminator import Discriminator
-from dcgan.Generator import Generator
+from dcgan.CNN.Discriminator import Discriminator
+from dcgan.CNN.lsDiscriminator import lsDiscriminator
+from dcgan.CNN.lsGenerator import lsGenerator
+from dcgan.CNN.Generator import Generator
 from DatasetLoader import data_loader
 
 
