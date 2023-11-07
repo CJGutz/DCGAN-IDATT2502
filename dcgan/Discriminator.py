@@ -52,10 +52,8 @@ class Discriminator(nn.Module):
                 true_positive = self.times_correct(preds_real, real_labels)
                 false_positive = self.times_correct(preds_real, fake_labels)
                 false_negative = self.times_correct(preds_fake, real_labels)
-                print("true_positive: ", true_positive, "false_positive: ", false_positive, "false_negative: ", false_negative)
                 precision = self.calc_precision(true_positive, false_positive)
                 recall = self.calc_recall(true_positive, false_negative)
-                print("precision: ", precision, "recall: ", recall)
                 return 2 * ((precision * recall) / max(precision + recall, ZERO_SUBSTITUTE))
         
 
