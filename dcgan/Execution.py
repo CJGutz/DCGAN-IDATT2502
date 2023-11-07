@@ -72,10 +72,9 @@ def run(cli_args):
         plot_iteration_values(
             SubFigure("Loss", [IterationValues("G(x)", gan.G_losses),
                                IterationValues("D(x)", gan.D_losses)]),
-            SubFigure("Accuracy", [IterationValues("G(x)", gan.G_accuracies),
-                                   IterationValues("D(x)", gan.D_accuracies)]),
-            title="Loss and Accuracy",
-            file_name=f"{model_name}-accuracy-loss.png")
+            SubFigure("F1 score", [IterationValues("D(x) F1", gan.f1_scores)]),
+            title="Loss and F1 score",
+            file_name=f"{model_name}-f1-loss.png")
         sys.exit(0)
 
     signal.signal(signal.SIGINT, tear_down)

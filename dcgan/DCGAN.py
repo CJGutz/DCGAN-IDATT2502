@@ -1,8 +1,11 @@
+from pickle import TRUE
+from matplotlib.pyplot import disconnect
 import torch
-import math
 import os
+from torch.functional import Tensor
 import torch.nn as nn
 import torch.optim as optim
+from torchvision.datasets import FakeData
 import torchvision.utils as vutils
 
 from Visualization import save_img_generated
@@ -52,8 +55,7 @@ class DCGAN:
 
         self.G_losses = []
         self.D_losses = []
-        self.G_accuracies = []
-        self.D_accuracies = []
+        self.f1_scores = []
         self.img_list = []
 
         if load:
@@ -81,14 +83,16 @@ class DCGAN:
                 self.discriminator.zero_grad()
                 # real samples created form batches
                 real_samples = data_batch[0].to(self.device)
-                # fills tabel with real label(1)
-                labels = torch.full((real_samples.size(0),), Label.REAL,
+
+                # fills tabel with real label(1) and fake label(0)
+                labels_real = torch.full((real_samples.size(0),), Label.REAL,
                                     dtype=torch.float, device=self.device)
+                labels_fake = labels_real.clone().fill_(Label.FAKE)
 
                 # calculate the loss and predicted value from real samples
                 netD_predictions_real = self.discriminator(
                     real_samples).view(-1)
-                netD_loss_real = criterion(netD_predictions_real, labels)
+                netD_loss_real = criterion(netD_predictions_real, labels_real)
                 netD_loss_real.backward()
 
                 # Testing discriminator on fake samples
@@ -96,12 +100,11 @@ class DCGAN:
                                     device=self.device)
                 # fake bact of samples created with generator
                 fake_samples = self.generator(noise)
-                labels.fill_(Label.FAKE)
 
                 # calculate the predicted value and loss from fake samples
                 netD_predictions_fake = self.discriminator(
                     fake_samples.detach()).view(-1)
-                netD_loss_fake = criterion(netD_predictions_fake, labels)
+                netD_loss_fake = criterion(netD_predictions_fake, labels_fake)
                 netD_loss_fake.backward()
 
                 # calculate the total loss of discriminator
@@ -110,11 +113,10 @@ class DCGAN:
 
                 # train netG
                 self.generator.zero_grad()
-                labels.fill_(Label.REAL)
 
                 # loss of generator
                 netG_output = self.discriminator(fake_samples).view(-1)
-                netG_loss = criterion(netG_output, labels)
+                netG_loss = criterion(netG_output, labels_real)
                 netG_loss.backward()
 
                 # optimizes generator using BCELoss
@@ -133,20 +135,15 @@ class DCGAN:
                     self.save_iteration_images(
                         fixed_noise, epoch, i, nth_iteration)
 
-                # save loss and accuracy of both D(x) and G(x) for further visualization
+                # save loss of both D(x) and G(x) and f1 score 
+                # for further visualization
                 self.D_losses.append(netD_loss.item())
                 self.G_losses.append(netG_loss.item())
-                self.D_accuracies.append((
-                    (self.discriminator.accuracy(
-                        netD_predictions_real,
-                        labels.fill_(Label.REAL))
-                        + self.discriminator.accuracy(
-                            netD_predictions_fake,
-                        labels.fill_(Label.FAKE))
-                     ) / 2).item())
-                self.G_accuracies.append(
-                    self.generator.accuracy(
-                        netG_output, labels.fill_(Label.REAL)).item())
+
+                self.f1_scores.append(self.discriminator.calc_f1_score(
+                    netD_predictions_real, netD_predictions_fake,
+                    labels_real, labels_fake
+                ))
 
     def save_iteration_images(self, fixed_noise, epoch, iteration, nth_iteration):
         with torch.no_grad():
