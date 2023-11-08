@@ -1,41 +1,37 @@
 import torch.nn as nn
 import torch
 
-
 class lsDiscriminator(nn.Module):
-    def __init__(self, numb_color_channels, ndf, number_of_layers=3, **kwargs):
+    def __init__(self, numb_color_channels, ndf, n_downsamplings=3, **kwargs):
         super(lsDiscriminator, self).__init__(**kwargs)
 
         layers = []
-        in_dim = numb_color_channels
 
-        for i in range(number_of_layers):
-            out_dim = ndf * 2 ** i
-            layers.append(self.stand_layer(in_dim, out_dim,
-                                           kernel_size=4, stride=2, padding=1))
-            in_dim = out_dim
+        d = ndf
+        layers.append(nn.Conv2d(numb_color_channels, d, kernel_size=4, stride=2, padding=1))
+        layers.append(nn.LeakyReLU(0.2))
 
-        # Output layer
-        layers.append(nn.Conv2d(out_dim, 1,
-                                kernel_size=4, stride=1, padding=0, bias=False))
+        for i in range(n_downsamplings):
+            d_last = d
+            d = min(ndf * 2 ** (i + 1), ndf * 8)
+            layers.append(self.stand_layer(d_last, d, kernel_size=4, stride=2, padding=1))
 
-        # AdaptiveAvgPool2d layer to dynamically adjust spatial dimensions
-        layers.append(nn.AdaptiveAvgPool2d(1))
+        # 2: logit
+        layers.append(nn.Conv2d(d, 1, kernel_size=4, stride=1, padding=0))
 
-        self.main = nn.Sequential(*layers)
+        self.net = nn.Sequential(*layers)
 
     def forward(self, x):
-        out = self.main(x)
-        return out
+        y = self.net(x)
+        return y
 
     def accuracy(self, x, y):
         return torch.mean(torch.less(torch.abs(x - y), 0.5).float())
 
     def stand_layer(self, in_dim, out_dim, kernel_size, stride, padding):
         return nn.Sequential(
-            nn.Conv2d(in_dim, out_dim, kernel_size,
-                      stride=stride, padding=padding, bias=False),
+            nn.Conv2d(in_dim, out_dim, kernel_size, stride=stride, padding=padding,
+                      bias=False),
             nn.BatchNorm2d(out_dim),
-            nn.LeakyReLU(0.2,
-                         inplace=True)
+            nn.LeakyReLU(0.2)
         )

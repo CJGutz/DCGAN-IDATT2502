@@ -73,9 +73,8 @@ class DCGAN:
         # Hyperparams
         numb_episodes = len(self.dataloader)
         if self.gan == GAN.LSGAN:
-            criterion = nn.MSELoss().to(device=self.device)
+            criterion = nn.MSELoss()
         else:
-            print("upps")
             criterion = nn.BCELoss().to(device=self.device)
 
         return fixed_noise, numb_episodes, criterion
@@ -115,7 +114,7 @@ class DCGAN:
                 netD_loss_fake.backward()
 
                 # calculate the total loss of discriminator
-                netD_loss = 0.5*(netD_loss_real + netD_loss_fake)
+                netD_loss = netD_loss_real + netD_loss_fake
                 self.optim_disc.step()
 
                 # train netG
