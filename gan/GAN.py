@@ -92,14 +92,14 @@ class DCGAN:
                 real_samples = data_batch[0].to(self.device)
 
                 # fills tabel with real label(1) and fake label(0)
-                labels_real = torch.full((real_samples.size(0), 1),
+                labels_real = torch.full((real_samples.size(0),),
                                          Label.REAL, dtype=torch.float, device=self.device)
-                labels_fake = torch.full((real_samples.size(0), 1),
+                labels_fake = torch.full((real_samples.size(0),),
                                          Label.FAKE, dtype=torch.float, device=self.device)
 
                 # calculate the loss and predicted value from real samples
                 netD_predictions_real = self.discriminator(real_samples).view(-1)
-                netD_loss_real = criterion(netD_predictions_real, labels_real)
+                netD_loss_real = torch.mean((netD_predictions_real - 1) ** 2)
                 netD_loss_real.backward()
 
                 # Testing discriminator on fake samples
@@ -111,11 +111,11 @@ class DCGAN:
                 # calculate the predicted value and loss from fake samples
                 netD_predictions_fake = self.discriminator(
                     fake_samples.detach()).view(-1)
-                netD_loss_fake = criterion(netD_predictions_fake, labels_fake)
+                netD_loss_fake = torch.mean(netD_predictions_fake ** 2)
                 netD_loss_fake.backward()
 
                 # calculate the total loss of discriminator
-                netD_loss = netD_loss_real + netD_loss_fake
+                netD_loss = 0.5*(netD_loss_real + netD_loss_fake)
                 self.optim_disc.step()
 
                 # train netG
@@ -123,7 +123,7 @@ class DCGAN:
 
                 # loss of generator
                 netG_output = self.discriminator(fake_samples).view(-1)
-                netG_loss = criterion(netG_output, labels_real)
+                netG_loss = torch.mean((netG_output - 1) ** 2)
                 netG_loss.backward()
 
                 # optimizes generator using loss function
@@ -142,7 +142,6 @@ class DCGAN:
                     self.save_iteration_images(
                         fixed_noise, epoch, i, nth_iteration)
 
-                # save loss of both D(x) and G(x) and f1 score
                 # for further visualization
                 self.D_losses.append(netD_loss.item())
                 self.G_losses.append(netG_loss.item())
