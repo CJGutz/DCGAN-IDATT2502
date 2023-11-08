@@ -99,7 +99,7 @@ class DCGAN:
 
                 # calculate the loss and predicted value from real samples
                 netD_predictions_real = self.discriminator(real_samples).view(-1)
-                netD_loss_real = torch.mean((netD_predictions_real - 1) ** 2)
+                netD_loss_real = criterion(netD_predictions_real, labels_real)
                 netD_loss_real.backward()
 
                 # Testing discriminator on fake samples
@@ -111,7 +111,7 @@ class DCGAN:
                 # calculate the predicted value and loss from fake samples
                 netD_predictions_fake = self.discriminator(
                     fake_samples.detach()).view(-1)
-                netD_loss_fake = torch.mean(netD_predictions_fake ** 2)
+                netD_loss_fake = criterion(netD_predictions_fake, labels_fake)
                 netD_loss_fake.backward()
 
                 # calculate the total loss of discriminator
@@ -123,7 +123,7 @@ class DCGAN:
 
                 # loss of generator
                 netG_output = self.discriminator(fake_samples).view(-1)
-                netG_loss = torch.mean((netG_output - 1) ** 2)
+                netG_loss = criterion(netG_output, labels_real)
                 netG_loss.backward()
 
                 # optimizes generator using loss function
