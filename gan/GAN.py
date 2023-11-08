@@ -1,18 +1,15 @@
 import torch
-import math
-import numpy as np
 import os
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.utils as vutils
-from torch.autograd import Variable
 
 from Visualization import save_img_generated
 
 
 class Label:
-    REAL = 1
-    FAKE = 0
+    REAL = 1.
+    FAKE = 0.
 
 
 class GAN:
@@ -78,6 +75,7 @@ class DCGAN:
         if self.gan == GAN.LSGAN:
             criterion = nn.MSELoss().to(device=self.device)
         else:
+            print("upps")
             criterion = nn.BCELoss().to(device=self.device)
 
         return fixed_noise, numb_episodes, criterion
@@ -86,59 +84,68 @@ class DCGAN:
         (fixed_noise, numb_episodes,
          criterion) = self.pre_training()
 
-        Tensor = torch.FloatTensor
-
         for epoch in range(1, self.num_epochs + 1):
             for i, data_batch in enumerate(self.dataloader, 0):
+                # training netG in real_samples
+                self.discriminator.zero_grad()
+                # real samples created form batches
                 real_samples = data_batch[0].to(self.device)
-                # Adversarial ground truths
-                valid = Variable(Tensor(real_samples.size(0), 1).fill_(1.0), requires_grad=False).squeeze()
-                fake = Variable(Tensor(real_samples.size(0), 1).fill_(0.0), requires_grad=False).squeeze()
 
-                # Configure input
-                real_imgs = Variable(real_samples.type(Tensor))
+                # fills tabel with real label(1) and fake label(0)
+                labels_real = torch.full((real_samples.size(0), 1),
+                                         Label.REAL, dtype=torch.float, device=self.device)
+                labels_fake = torch.full((real_samples.size(0), 1),
+                                         Label.FAKE, dtype=torch.float, device=self.device)
 
-                # -----------------
-                #  Train Generator
-                # -----------------
+                # calculate the loss and predicted value from real samples
+                netD_predictions_real = self.discriminator(real_samples).view(-1)
+                netD_loss_real = criterion(netD_predictions_real, labels_real)
+                netD_loss_real.backward()
 
-                self.optim_gen.zero_grad()
+                # Testing discriminator on fake samples
+                noise = torch.randn(real_samples.size(0), self.nz, 1, 1,
+                                    device=self.device)
+                # fake bact of samples created with generator
+                fake_samples = self.generator(noise)
 
-                # Sample noise as generator input
-                z = Variable(Tensor(np.random.normal(0, 1, (real_samples.size(0), self.nz, 1, 1))))
+                # calculate the predicted value and loss from fake samples
+                netD_predictions_fake = self.discriminator(
+                    fake_samples.detach()).view(-1)
+                netD_loss_fake = criterion(netD_predictions_fake, labels_fake)
+                netD_loss_fake.backward()
 
-                # Generate a batch of images
-                gen_imgs = self.generator(z)
-
-                # Loss measures generator's ability to fool the discriminator
-                g_loss = criterion(self.discriminator(gen_imgs), valid)
-
-                g_loss.backward()
-                self.optim_gen.step()
-
-                # ---------------------
-                #  Train Discriminator
-                # ---------------------
-
-                self.optim_disc.zero_grad()
-
-                # Measure discriminator's ability to classify real from generated samples
-                real_loss = criterion(self.discriminator(real_imgs), valid)
-                fake_loss = criterion(self.discriminator(gen_imgs.detach()), fake)
-                d_loss = 0.5 * (real_loss + fake_loss)
-
-                d_loss.backward()
+                # calculate the total loss of discriminator
+                netD_loss = netD_loss_real + netD_loss_fake
                 self.optim_disc.step()
 
-                if i % 50 == 0:
-                    print(
-                        "[Epoch %d/%d] [Batch %d/%d] [D loss: %f] [G loss: %f]"
-                        % (epoch, self.num_epochs, i, len(self.dataloader), d_loss.item(), g_loss.item())
-                    )
+                # train netG
+                self.generator.zero_grad()
 
-                batches_done = epoch * len(self.dataloader) + i
-                if batches_done % 500 == 0:
-                    self.save_iteration_images(fixed_noise, epoch, i, len(self.dataloader) // 3)
+                # loss of generator
+                netG_output = self.discriminator(fake_samples).view(-1)
+                netG_loss = criterion(netG_output, labels_real)
+                netG_loss.backward()
+
+                # optimizes generator using loss function
+                self.optim_gen.step()
+
+                # Print and save losses and generated images
+                if i % 50 == 0:
+                    print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f'
+                          % (epoch, self.num_epochs, i, len(self.dataloader),
+                             netD_loss.item(), netG_loss.item()))
+
+                # if statement used for printing images
+                nth_iteration = len(self.dataloader) // 3
+                if ((i + 1) % nth_iteration == 0) or (
+                        (epoch == self.num_epochs) and (i == len(self.dataloader) - 1)):
+                    self.save_iteration_images(
+                        fixed_noise, epoch, i, nth_iteration)
+
+                # save loss of both D(x) and G(x) and f1 score
+                # for further visualization
+                self.D_losses.append(netD_loss.item())
+                self.G_losses.append(netG_loss.item())
 
     def save_iteration_images(self, fixed_noise, epoch, iteration, nth_iteration):
         with torch.no_grad():

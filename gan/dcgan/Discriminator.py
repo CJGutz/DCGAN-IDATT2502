@@ -36,6 +36,7 @@ class Discriminator(nn.Module):
         self.main = nn.Sequential(*layers)
 
     def forward(self, x):
+        print(self.main(x).shape)
         return self.main(x)
 
     def accuracy(self, x, y):

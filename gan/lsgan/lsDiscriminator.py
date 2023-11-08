@@ -6,33 +6,36 @@ class lsDiscriminator(nn.Module):
     def __init__(self, numb_color_channels, ndf, number_of_layers=3, **kwargs):
         super(lsDiscriminator, self).__init__(**kwargs)
 
-        self.main = nn.Sequential(
-            # Layer 1
-            nn.Conv2d(numb_color_channels, ndf, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(ndf),
-            nn.LeakyReLU(0.2, inplace=True),
+        layers = []
+        in_dim = numb_color_channels
 
-            # Layer 2
-            nn.Conv2d(ndf, ndf*2, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(ndf*2),
-            nn.LeakyReLU(0.2, inplace=True),
+        for i in range(number_of_layers):
+            out_dim = ndf * 2 ** i
+            layers.append(self.stand_layer(in_dim, out_dim,
+                                           kernel_size=4, stride=2, padding=1))
+            in_dim = out_dim
 
-            # Layer 3
-            nn.Conv2d(ndf*2, ndf*4, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(ndf*4),
-            nn.LeakyReLU(0.2, inplace=True),
+        # Output layer
+        layers.append(nn.Conv2d(out_dim, 1,
+                                kernel_size=4, stride=1, padding=0, bias=False))
 
-            # Layer 4
-            nn.Conv2d(ndf*4, ndf*8, kernel_size=4, stride=2, padding=1, bias=False),
-            nn.BatchNorm2d(ndf*8),
-            nn.LeakyReLU(0.2, inplace=True),
+        # AdaptiveAvgPool2d layer to dynamically adjust spatial dimensions
+        layers.append(nn.AdaptiveAvgPool2d(1))
 
-            # Layer 5
-            nn.Conv2d(ndf * 8, 1, kernel_size=4, stride=1, padding=0, bias=False),
-        )
+        self.main = nn.Sequential(*layers)
 
     def forward(self, x):
-        return self.main(x)
+        out = self.main(x)
+        return out
 
     def accuracy(self, x, y):
         return torch.mean(torch.less(torch.abs(x - y), 0.5).float())
+
+    def stand_layer(self, in_dim, out_dim, kernel_size, stride, padding):
+        return nn.Sequential(
+            nn.Conv2d(in_dim, out_dim, kernel_size,
+                      stride=stride, padding=padding, bias=False),
+            nn.BatchNorm2d(out_dim),
+            nn.LeakyReLU(0.2,
+                         inplace=True)
+        )
