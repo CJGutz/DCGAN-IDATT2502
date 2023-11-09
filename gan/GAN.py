@@ -73,7 +73,7 @@ class DCGAN:
         # Hyperparams
         numb_episodes = len(self.dataloader)
         if self.gan == GAN.LSGAN:
-            criterion = nn.MSELoss()
+            criterion = nn.MSELoss().to(device=self.device)
         else:
             criterion = nn.BCELoss().to(device=self.device)
 
@@ -85,47 +85,31 @@ class DCGAN:
 
         for epoch in range(1, self.num_epochs + 1):
             for i, data_batch in enumerate(self.dataloader, 0):
-                # training netG in real_samples
+                imgs_gpu = data_batch[0].to(self.device)
+                b_size = imgs_gpu.size(0)
+
                 self.discriminator.zero_grad()
-                # real samples created form batches
-                real_samples = data_batch[0].to(self.device)
-
-                # fills tabel with real label(1) and fake label(0)
-                labels_real = torch.full((real_samples.size(0),),
-                                         Label.REAL, dtype=torch.float, device=self.device)
-                labels_fake = torch.full((real_samples.size(0),),
-                                         Label.FAKE, dtype=torch.float, device=self.device)
-
-                # calculate the loss and predicted value from real samples
-                netD_predictions_real = self.discriminator(real_samples).view(-1)
-                netD_loss_real = criterion(netD_predictions_real, labels_real)
-                netD_loss_real.backward()
-
-                # Testing discriminator on fake samples
-                noise = torch.randn(real_samples.size(0), self.nz, 1, 1,
+                noise = torch.randn(b_size, self.nz, 1, 1,
                                     device=self.device)
-                # fake bact of samples created with generator
-                fake_samples = self.generator(noise)
 
-                # calculate the predicted value and loss from fake samples
-                netD_predictions_fake = self.discriminator(
-                    fake_samples.detach()).view(-1)
-                netD_loss_fake = criterion(netD_predictions_fake, labels_fake)
-                netD_loss_fake.backward()
+                generator_imgs = self.generator(noise)
+                outs = self.discriminator(generator_imgs.detach())
+                netD_loss_fake = criterion(outs, torch.zeros_like(outs))
 
-                # calculate the total loss of discriminator
-                netD_loss = netD_loss_real + netD_loss_fake
+                outs = self.discriminator(imgs_gpu)
+                netD_loss_real = criterion(outs, torch.ones_like(outs))
+
+                netD_loss = netD_loss_fake + netD_loss_real
+
+                netD_loss.backward()
                 self.optim_disc.step()
 
-                # train netG
                 self.generator.zero_grad()
+                generator_imgs = self.generator(noise)
+                outs = self.discriminator(generator_imgs)
+                netG_loss = criterion(outs, torch.ones_like(outs))
 
-                # loss of generator
-                netG_output = self.discriminator(fake_samples).view(-1)
-                netG_loss = criterion(netG_output, labels_real)
                 netG_loss.backward()
-
-                # optimizes generator using loss function
                 self.optim_gen.step()
 
                 # Print and save losses and generated images

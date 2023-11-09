@@ -6,24 +6,35 @@ class lsGenerator(nn.Module):
     def __init__(self, nz, ngf, n_channels=3, num_layers=4):
         super(lsGenerator, self).__init__()
 
-        layers = []
+        self.main = nn.Sequential(
+            # 1 x latent_size
+            nn.ConvTranspose2d(nz, ngf * 16, 4, 1, 0, bias=False),
+            nn.LeakyReLU(0.01, True),
+            nn.BatchNorm2d(ngf * 16),
+            # 16ngf * 4 * 4
+            nn.ConvTranspose2d(ngf * 16, ngf * 8, 4, 2, 1, bias=False),
+            nn.LeakyReLU(0.01, True),
+            nn.BatchNorm2d(ngf * 8),
+            # 8ngf * 8 * 8
+            nn.ConvTranspose2d(ngf * 8, ngf * 4, 4, 2, 1, bias=False),
+            nn.LeakyReLU(0.01, True),
+            nn.BatchNorm2d(ngf * 4),
+            # 4ngf * 16 * 16
+            nn.ConvTranspose2d(ngf * 4, ngf * 2, 4, 2, 1, bias=False),
+            nn.LeakyReLU(0.01, True),
+            nn.BatchNorm2d(ngf * 2),
+            # 2ngf * 32 * 32
+            nn.ConvTranspose2d(ngf * 2, ngf * 1, 4, 2, 1, bias=False),
+            nn.LeakyReLU(0.01, True),
+            nn.BatchNorm2d(ngf * 1),
+            # ngf * 64 * 64
+            nn.ConvTranspose2d(ngf * 1, 3, 4, 2, 1, bias=False),
+            nn.Tanh()
+            # 3 * 128 * 128
+        )
 
-        d = min(nz * 2 ** (num_layers - 1), ngf * 8)
-        layers.append(self.stand_layer(nz, d, kernel_size=4, stride=1, padding=0))
-
-        for i in range(num_layers - 1):
-            d_last = d
-            d = min(ngf * 2 ** (num_layers - 2 - i), ngf * 8)
-            layers.append(self.stand_layer(d_last, d, kernel_size=4, stride=2, padding=1))
-
-        layers.append(nn.ConvTranspose2d(d, n_channels, kernel_size=4, stride=2, padding=1))
-        layers.append(nn.Tanh())
-
-        self.net = nn.Sequential(*layers)
-
-    def forward(self, z):
-        x = self.net(z)
-        return x
+    def forward(self, x):
+        return self.main(x)
 
     def accuracy(self, x, y):
         return torch.mean(torch.less(torch.abs(x - y), 0.5).float())
