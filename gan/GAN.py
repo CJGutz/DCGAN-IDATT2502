@@ -74,10 +74,10 @@ class DCGAN:
         # Hyperparams
         numb_episodes = len(self.dataloader)
         if self.gan == GAN.LSGAN:
-            print("Starting Training using MSE")
+            print("Starting Training using MSE...")
             criterion = nn.MSELoss().to(device=self.device)
         else:
-            print("Starting Training using BCE")
+            print("Starting Training using BCE...")
             criterion = nn.BCELoss().to(device=self.device)
 
         return fixed_noise, numb_episodes, criterion

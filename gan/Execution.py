@@ -67,9 +67,9 @@ def run(cli_args):
     # Create an instance of discriminator and generator
     if args.gan == GAN.LSGAN:
         discriminator = lsDiscriminator(
-            args.channels, args.ndf, args.layers).to(device)
-        generator = lsGenerator(args.nz, args.ngf, args.channels
-                                ).to(device)
+            args.channels, args.ndf).to(device)
+        generator = lsGenerator(
+            args.nz, args.ngf, args.channels).to(device)
     else:
         discriminator = Discriminator(
             args.channels, args.ndf, args.layers).to(device)
