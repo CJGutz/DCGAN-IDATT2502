@@ -59,6 +59,7 @@ class DCGAN:
         self.D_losses = []
         self.G_accuracies = []
         self.D_accuracies = []
+        self.f1_scores = []
         self.img_list = []
 
         if load:
@@ -73,8 +74,10 @@ class DCGAN:
         # Hyperparams
         numb_episodes = len(self.dataloader)
         if self.gan == GAN.LSGAN:
+            print("Starting Training using MSE")
             criterion = nn.MSELoss().to(device=self.device)
         else:
+            print("Starting Training using BCE")
             criterion = nn.BCELoss().to(device=self.device)
 
         return fixed_noise, numb_episodes, criterion
@@ -141,9 +144,15 @@ class DCGAN:
                     self.save_iteration_images(
                         fixed_noise, epoch, i, nth_iteration)
 
+                # save loss of both D(x) and G(x) and f1 score
                 # for further visualization
                 self.D_losses.append(netD_loss.item())
                 self.G_losses.append(netG_loss.item())
+
+                self.f1_scores.append(self.discriminator.calc_f1_score(
+                    netD_predictions_real, netD_predictions_fake,
+                    labels_real, labels_fake
+                ))
 
     def save_iteration_images(self, fixed_noise, epoch, iteration, nth_iteration):
         with torch.no_grad():
