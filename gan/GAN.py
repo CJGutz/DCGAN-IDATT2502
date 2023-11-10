@@ -1,19 +1,20 @@
-from pickle import TRUE
-from matplotlib.pyplot import disconnect
 import torch
 import os
-from torch.functional import Tensor
 import torch.nn as nn
 import torch.optim as optim
-from torchvision.datasets import FakeData
 import torchvision.utils as vutils
 
-from Visualization import save_img_generated
+from Visualization import save_img_generated, plot_iteration_values, SubFigure, IterationValues
 
 
 class Label:
-    REAL = 1
-    FAKE = 0
+    REAL = 1.
+    FAKE = 0.
+
+
+class GAN:
+    LSGAN = "lsgan"
+    DCGAN = "dcgan"
 
 
 # based in the paper by Alec Radford the, the team concluded that the weight should be distributed in this manner
@@ -27,10 +28,11 @@ def weights(model):
 
 
 class DCGAN:
-    def __init__(self, generator, discriminator, num_epochs, dataloader, model_name, nc, device,
-                 batch_size=128, lr=0.0002, beta1=0.5, nz=100, load=False):
+    def __init__(self, generator, discriminator, num_epochs, dataloader, model_name, nc, device, gan,
+                 batch_size=128, lr=0.0002, beta1=0.5, nz=100, load=False, model_save=True):
         super(DCGAN, self).__init__()
 
+        self.gan = gan
         self.device = device
         self.model_name = model_name
 
@@ -55,8 +57,12 @@ class DCGAN:
 
         self.G_losses = []
         self.D_losses = []
+        self.G_accuracies = []
+        self.D_accuracies = []
         self.f1_scores = []
         self.img_list = []
+
+        self.model_save = model_save
 
         if load:
             print("loading model")
@@ -69,7 +75,12 @@ class DCGAN:
 
         # Hyperparams
         numb_episodes = len(self.dataloader)
-        criterion = nn.BCELoss().to(self.device)
+        if self.gan == GAN.LSGAN:
+            print("Starting Training using MSE...")
+            criterion = nn.MSELoss().to(device=self.device)
+        else:
+            print("Starting Training using BCE...")
+            criterion = nn.BCELoss().to(device=self.device)
 
         return fixed_noise, numb_episodes, criterion
 
@@ -77,7 +88,7 @@ class DCGAN:
         (fixed_noise, numb_episodes,
          criterion) = self.pre_training()
 
-        for epoch in range(1, self.num_epochs+1):
+        for epoch in range(1, self.num_epochs + 1):
             for i, data_batch in enumerate(self.dataloader, 0):
                 # training netG in real_samples
                 self.discriminator.zero_grad()
@@ -86,7 +97,7 @@ class DCGAN:
 
                 # fills tabel with real label(1) and fake label(0)
                 labels_real = torch.full((real_samples.size(0),), Label.REAL,
-                                    dtype=torch.float, device=self.device)
+                                         dtype=torch.float, device=self.device)
                 labels_fake = labels_real.clone().fill_(Label.FAKE)
 
                 # calculate the loss and predicted value from real samples
@@ -135,7 +146,7 @@ class DCGAN:
                     self.save_iteration_images(
                         fixed_noise, epoch, i, nth_iteration)
 
-                # save loss of both D(x) and G(x) and f1 score 
+                # save loss of both D(x) and G(x) and f1 score
                 # for further visualization
                 self.D_losses.append(netD_loss.item())
                 self.G_losses.append(netG_loss.item())
@@ -144,6 +155,24 @@ class DCGAN:
                     netD_predictions_real, netD_predictions_fake,
                     labels_real, labels_fake
                 ))
+
+                # plots data for analyzing runs. Added to store data regardless if idun terminates the code
+                # tries low_value to see the low scores with more details
+                plot_iteration_values(
+                    SubFigure("Loss", [IterationValues("G(x)", self.G_losses),
+                                       IterationValues("D(x)", self.D_losses)], 10),
+                    SubFigure("F1 score", [IterationValues("D(x) F1", self.f1_scores)]),
+                    title=f"Loss < 5 and F1 score for epoch{epoch}-{self.num_epochs}-itr{(i + 1) // nth_iteration}",
+                    file_name=f"fig-low_value-f1-loss.png")
+
+                plot_iteration_values(
+                    SubFigure("Loss", [IterationValues("G(x)", self.G_losses),
+                                       IterationValues("D(x)", self.D_losses)]),
+                    SubFigure("F1 score", [IterationValues("D(x) F1", self.f1_scores)]),
+                    title=f"Loss and F1 score for epoch{epoch}-{self.num_epochs}-itr{(i + 1) // nth_iteration}",
+                    file_name=f"fig-last-iteration-f1-loss.png")
+            if self.model_save:
+                self.save_model()
 
     def save_iteration_images(self, fixed_noise, epoch, iteration, nth_iteration):
         with torch.no_grad():

@@ -2,16 +2,25 @@ import torch
 import sys
 import signal
 import argparse
+import torch.nn as nn
+
 from Visualization import (
     IterationValues,
     SubFigure,
     print_start_img,
     plot_iteration_values
 )
-from dcgan.DCGAN import DCGAN as dcgan
-from dcgan.Discriminator import Discriminator
-from dcgan.Generator import Generator
+from gan.GAN import DCGAN as dcgan
+from gan.dcgan.Discriminator import Discriminator
+from gan.lsgan.lsDiscriminator import lsDiscriminator
+from gan.dcgan.Generator import Generator
+from gan.lsgan.lsGenerator import lsGenerator
 from DatasetLoader import data_loader
+
+
+class GAN:
+    LSGAN = "lsgan"
+    DCGAN = "dcgan"
 
 
 def run(cli_args):
@@ -19,6 +28,7 @@ def run(cli_args):
         prog="DCGAN implementation",
     )
     parser.add_argument("dataset", type=str)
+    parser.add_argument("-g", "--gan", type=str, required=True)
     parser.add_argument("-c", "--channels", required=True,
                         type=int, choices=[1, 3])
     parser.add_argument("-i", "--img-size", default=64, type=int)
@@ -52,17 +62,31 @@ def run(cli_args):
 
     # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (
-        torch.cuda.is_available() and gpu_count > 0) else "cpu")
+            torch.cuda.is_available() and gpu_count > 0) else "cpu")
+    device = "cpu"
+
+    # Init different discriminators based on choice
     # Create an instance of discriminator and generator
-    generator = Generator(args.nz, args.ngf, args.channels,
-                          args.layers).to(device)
-    discriminator = Discriminator(
-        args.channels, args.ndf, args.layers).to(device)
-    # Create an instance of the dcgan
+    if args.gan == GAN.LSGAN:
+        discriminator = lsDiscriminator(
+            args.channels, args.ndf).to(device)
+        generator = lsGenerator(
+            args.nz, args.ngf, args.channels).to(device)
+    else:
+        discriminator = Discriminator(
+            args.channels, args.ndf, args.layers).to(device)
+        generator = Generator(args.nz, args.ngf, args.channels,
+                              args.layers).to(device)
+
+    if (device == 'cuda') and (gpu_count > 1):
+        discriminator = nn.DataParallel(discriminator, list(range(gpu_count)))
+        generator = nn.DataParallel(discriminator, list(range(gpu_count)))
+
+    # Create an instance of the gan
     gan = dcgan(generator, discriminator, args.epochs, dataloader, model_name,
-                args.channels, device,
+                args.channels, device, args.gan,
                 args.batch_size, args.learning_rate, args.beta1,
-                args.nz, args.load_model)
+                args.nz, args.load_model, not args.no_model_save)
 
     def tear_down(signal, frame):
         if not args.no_model_save:
