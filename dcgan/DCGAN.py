@@ -3,10 +3,9 @@ import os
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.utils as vutils
-import matplotlib.pyplot as plt
-
 
 from Visualization import save_img_generated, plot_iteration_values, SubFigure, IterationValues
+
 
 class Label:
     REAL = 1.
@@ -68,8 +67,6 @@ class DCGAN:
         if load:
             print("loading model")
             self.load_model()
-
-
 
     def pre_training(self):
         # Create batch of latent vectors that we will use to visualize

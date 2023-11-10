@@ -77,8 +77,7 @@ def run(cli_args):
         generator = Generator(args.nz, args.ngf, args.channels,
                               args.layers).to(device)
 
-    # Parallel data using cuda (maby device.type)
-    if (device == 'cuda') and (gpu_count > 1):
+    if (device.type == 'cuda') and (gpu_count > 1):
         discriminator = nn.DataParallel(discriminator, list(range(gpu_count)))
         generator = nn.DataParallel(discriminator, list(range(gpu_count)))
 

@@ -5,6 +5,7 @@ import torchvision.datasets as dset
 import os
 from tqdm import tqdm
 
+
 VISION_DATASETS = {
     "MNIST": dset.MNIST,
     "FashionMNIST": dset.FashionMNIST,
@@ -32,9 +33,8 @@ def data_loader(dataset_path, image_size, batch_size, channels, dataset_dir="./d
     if dataset_path in VISION_DATASETS.keys():
         dataset = VISION_DATASETS[dataset_path]
         dataset = dataset(root=dataset_dir, train=True,
-                          transform=transform, download=True, )
+                          transform=transform, download=True,)
         model_name = dataset_path
-
     else:
         if dataset_path.endswith('.zip'):
             zip_path = dataset_path
