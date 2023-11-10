@@ -3,9 +3,10 @@ import os
 import torch.nn as nn
 import torch.optim as optim
 import torchvision.utils as vutils
+import matplotlib.pyplot as plt
 
-from Visualization import save_img_generated
 
+from Visualization import save_img_generated, plot_iteration_values, SubFigure, IterationValues
 
 class Label:
     REAL = 1.
@@ -29,7 +30,7 @@ def weights(model):
 
 class DCGAN:
     def __init__(self, generator, discriminator, num_epochs, dataloader, model_name, nc, device, gan,
-                 batch_size=128, lr=0.0002, beta1=0.5, nz=100, load=False):
+                 batch_size=128, lr=0.0002, beta1=0.5, nz=100, load=False, model_save=True):
         super(DCGAN, self).__init__()
 
         self.gan = gan
@@ -62,9 +63,13 @@ class DCGAN:
         self.f1_scores = []
         self.img_list = []
 
+        self.model_save = model_save
+
         if load:
             print("loading model")
             self.load_model()
+
+
 
     def pre_training(self):
         # Create batch of latent vectors that we will use to visualize
@@ -153,6 +158,24 @@ class DCGAN:
                     netD_predictions_real, netD_predictions_fake,
                     labels_real, labels_fake
                 ))
+
+                # plots data for analyzing runs. Added to store data regardless if idun terminates the code
+                # tries low_value to see the low scores with more details
+                plot_iteration_values(
+                    SubFigure("Loss", [IterationValues("G(x)", self.G_losses),
+                                       IterationValues("D(x)", self.D_losses)], 10),
+                    SubFigure("F1 score", [IterationValues("D(x) F1", self.f1_scores)]),
+                    title=f"Loss < 5 and F1 score for epoch{epoch}-{self.num_epochs}-itr{(i + 1) // nth_iteration}",
+                    file_name=f"fig-low_value-f1-loss.png")
+
+                plot_iteration_values(
+                    SubFigure("Loss", [IterationValues("G(x)", self.G_losses),
+                                       IterationValues("D(x)", self.D_losses)]),
+                    SubFigure("F1 score", [IterationValues("D(x) F1", self.f1_scores)]),
+                    title=f"Loss and F1 score for epoch{epoch}-{self.num_epochs}-itr{(i + 1) // nth_iteration}",
+                    file_name=f"fig-last-iteration-f1-loss.png")
+            if self.model_save:
+                self.save_model()
 
     def save_iteration_images(self, fixed_noise, epoch, iteration, nth_iteration):
         with torch.no_grad():
