@@ -1,4 +1,4 @@
-from dcgan.Execution import run as run_dcgan
+from gan.dcgan.Execution import run as run_dcgan
 import sys
 
 
