@@ -53,8 +53,6 @@ def plot_iteration_values(
     Args:
         graphs (SubFigure): SubFigure objects that contain the values
         and labels for the graphs
-        :param file_name:
-        :param title:
     """
     _, axes = plt.subplots(len(graphs), figsize=(10, 10))
 
