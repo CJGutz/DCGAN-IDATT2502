@@ -63,6 +63,7 @@ def run(cli_args):
     # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (
             torch.cuda.is_available() and gpu_count > 0) else "cpu")
+    device = "cpu"
 
     # Init different discriminators based on choice
     # Create an instance of discriminator and generator
@@ -77,7 +78,7 @@ def run(cli_args):
         generator = Generator(args.nz, args.ngf, args.channels,
                               args.layers).to(device)
 
-    if (device.type == 'cuda') and (gpu_count > 1):
+    if (device == 'cuda') and (gpu_count > 1):
         discriminator = nn.DataParallel(discriminator, list(range(gpu_count)))
         generator = nn.DataParallel(discriminator, list(range(gpu_count)))
 
