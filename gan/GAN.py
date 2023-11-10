@@ -1,4 +1,5 @@
 import torch
+from pytorch_gan_metrics import get_inception_score, get_fid
 import os
 import torch.nn as nn
 import torch.optim as optim
@@ -61,6 +62,8 @@ class DCGAN:
         self.D_accuracies = []
         self.f1_scores = []
         self.img_list = []
+        self.inception_scores_mean = []
+        self.inception_scores_std = []
 
         self.model_save = model_save
 
@@ -145,6 +148,13 @@ class DCGAN:
                         (epoch == self.num_epochs) and (i == len(self.dataloader) - 1)):
                     self.save_iteration_images(
                         fixed_noise, epoch, i, nth_iteration)
+                    fake_samples = (fake_samples - torch.min(fake_samples)) / \
+                        (torch.max(fake_samples) - torch.min(fake_samples))
+                    IS, IS_std = get_inception_score(
+                        fake_samples, use_torch=True)
+                    self.inception_scores_mean.append(IS)
+                    self.inception_scores_std.append(IS_std)
+                    get_fid(fake_samples, real_samples)
 
                 # save loss of both D(x) and G(x) and f1 score
                 # for further visualization
@@ -178,9 +188,12 @@ class DCGAN:
         with torch.no_grad():
             self.generator.eval()
             fake = self.generator(fixed_noise).detach().cpu()
-            self.img_list.append(vutils.make_grid(
-                fake, padding=2, normalize=True))
-            save_img_generated(self.img_list,
+            image = vutils.make_grid(
+                fake, padding=2, normalize=True
+            )
+
+            self.img_list.append(image)
+            save_img_generated(image,
                                f"fig-epoch{epoch}-{self.num_epochs}"
                                f"-itr{(iteration + 1) // nth_iteration}"
                                f"-{len(self.dataloader) // nth_iteration}.png")

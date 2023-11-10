@@ -21,10 +21,11 @@ def print_start_img(dataloader, grid_imgs=(8, 5), title="Starting Images"):
     plt.close()
 
 
-def save_img_generated(img_list, image_name):
+def save_img_generated(image, image_name):
+
     plt.figure(figsize=(12, 12))
     plt.title("Fake Images")
-    plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
+    plt.imshow(np.transpose(image, (1, 2, 0)))
     plt.axis("off")
     plt.savefig(os.path.join("datasets", "figures", image_name))
     plt.close()
@@ -54,7 +55,7 @@ def plot_iteration_values(
         graphs (SubFigure): SubFigure objects that contain the values
         and labels for the graphs
     """
-    _, axes = plt.subplots(len(graphs), figsize=(10, 10))
+    _, axes = plt.subplots(len(graphs), figsize=(5*len(graphs), 5))
 
     plt.title(title)
     for count, sub_figure in enumerate(graphs):
