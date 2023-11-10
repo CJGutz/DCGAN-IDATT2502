@@ -5,6 +5,7 @@ import torchvision.datasets as dset
 import os
 from tqdm import tqdm
 
+
 VISION_DATASETS = {
     "MNIST": dset.MNIST,
     "FashionMNIST": dset.FashionMNIST,
@@ -32,9 +33,8 @@ def data_loader(dataset_path, image_size, batch_size, channels, dataset_dir="./d
     if dataset_path in VISION_DATASETS.keys():
         dataset = VISION_DATASETS[dataset_path]
         dataset = dataset(root=dataset_dir, train=True,
-                          transform=transform, download=True, )
+                          transform=transform, download=True,)
         model_name = dataset_path
-
     else:
         if dataset_path.endswith('.zip'):
             zip_path = dataset_path
@@ -47,7 +47,7 @@ def data_loader(dataset_path, image_size, batch_size, channels, dataset_dir="./d
         if not model_name:
             model_name = os.path.basename(os.path.dirname(dataset_path))
 
-    dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
-                                             shuffle=True, num_workers=2, drop_last=True, pin_memory=False)
+    dataloader = torch.utils.data.DataLoader(
+        dataset, batch_size=batch_size, shuffle=True)
 
     return dataloader, model_name
