@@ -22,7 +22,6 @@ def print_start_img(dataloader, grid_imgs=(8, 5), title="Starting Images"):
 
 
 def save_img_generated(img_list, image_name):
-
     plt.figure(figsize=(12, 12))
     plt.title("Fake Images")
     plt.imshow(np.transpose(img_list[-1], (1, 2, 0)))
@@ -41,6 +40,7 @@ class IterationValues:
 class SubFigure:
     y_label: str
     values_labels: List[IterationValues]
+    ylim: int = None
 
 
 def plot_iteration_values(
@@ -53,14 +53,14 @@ def plot_iteration_values(
     Args:
         graphs (SubFigure): SubFigure objects that contain the values
         and labels for the graphs
-        :param file_name:
-        :param title:
     """
     _, axes = plt.subplots(len(graphs), figsize=(10, 10))
 
     plt.title(title)
     for count, sub_figure in enumerate(graphs):
         ax = axes[count]
+        if sub_figure.ylim:
+            ax.set_ylim([None, sub_figure.ylim])
         for plots in sub_figure.values_labels:
             ax.plot(plots.values, label=plots.label)
         ax.set_xlabel("Iterations")
@@ -69,3 +69,4 @@ def plot_iteration_values(
         ax.legend()
     plt.tight_layout()
     plt.savefig(os.path.join("datasets", "figures", file_name))
+    plt.close()

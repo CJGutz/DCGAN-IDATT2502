@@ -86,7 +86,7 @@ def run(cli_args):
     gan = dcgan(generator, discriminator, args.epochs, dataloader, model_name,
                 args.channels, device, args.gan,
                 args.batch_size, args.learning_rate, args.beta1,
-                args.nz, args.load_model)
+                args.nz, args.load_model, not args.no_model_save)
 
     def tear_down(signal, frame):
         if not args.no_model_save:
