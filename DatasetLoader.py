@@ -48,6 +48,6 @@ def data_loader(dataset_path, image_size, batch_size, channels, dataset_dir="./d
             model_name = os.path.basename(os.path.dirname(dataset_path))
 
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
-                                             shuffle=True, num_workers=2, drop_last=True, pin_memory=False)
+                                             shuffle=True, num_workers=1, drop_last=True, pin_memory=False)
 
     return dataloader, model_name
