@@ -27,7 +27,9 @@ class Generator(nn.Module):
                     nn.ConvTranspose2d(current_channels,
                                        current_channels // 2,
                                        kernel_size=4, stride=2, padding=1, bias=False),
+
                     nn.BatchNorm2d(current_channels // 2),
+
                     nn.ReLU(inplace=True)
                 ]
             )
