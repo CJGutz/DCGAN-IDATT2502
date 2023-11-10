@@ -10,12 +10,19 @@ class lsDiscriminator(nn.Module):
         super(lsDiscriminator, self).__init__(**kwargs)
 
         self.main = nn.Sequential(
-            self.stand_layer(numb_color_channels, ndf, 4, 2, 1),
-            self.stand_layer(ndf, ndf * 2, 4, 2, 1),
-            self.stand_layer(ndf * 2, ndf * 4, 4, 2, 1),
-            self.stand_layer(ndf * 4, ndf * 8, 4, 2, 1),
-            self.stand_layer(ndf * 8, ndf * 16, 4, 2, 1),
-            nn.Conv2d(ndf * 16, 1, 4, 1, 0, bias=True)
+            self.stand_layer(numb_color_channels, ndf,
+                             kernel_size=4, stride=2, padding=1),
+            self.stand_layer(ndf, ndf * 2,
+                             kernel_size=4, stride=2, padding=1),
+            self.stand_layer(ndf * 2, ndf * 4,
+                             kernel_size=4, stride=2, padding=1),
+            self.stand_layer(ndf * 4, ndf * 8,
+                             kernel_size=4, stride=2, padding=1),
+            self.stand_layer(ndf * 8, ndf * 16,
+                             kernel_size=4, stride=2, padding=1),
+
+            nn.Conv2d(ndf * 16, 1,
+                      kernel_size=4, stride=1, padding=0, bias=True)
         )
 
     def forward(self, x):

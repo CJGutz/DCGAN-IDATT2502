@@ -75,6 +75,9 @@ def run(cli_args):
             args.channels, args.ndf, args.layers).to(device)
         generator = Generator(args.nz, args.ngf, args.channels,
                               args.layers).to(device)
+
+    print(generator)
+    print(discriminator)
     # Create an instance of the gan
     gan = dcgan(generator, discriminator, args.epochs, dataloader, model_name,
                 args.channels, device, args.gan,
