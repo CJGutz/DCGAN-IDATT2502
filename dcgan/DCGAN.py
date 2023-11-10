@@ -1,7 +1,11 @@
+from pickle import TRUE
+from matplotlib.pyplot import disconnect
 import torch
 import os
+from torch.functional import Tensor
 import torch.nn as nn
 import torch.optim as optim
+from torchvision.datasets import FakeData
 import torchvision.utils as vutils
 import matplotlib.pyplot as plt
 
@@ -68,8 +72,6 @@ class DCGAN:
         if load:
             print("loading model")
             self.load_model()
-
-
 
     def pre_training(self):
         # Create batch of latent vectors that we will use to visualize
