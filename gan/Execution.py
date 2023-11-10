@@ -2,6 +2,8 @@ import torch
 import sys
 import signal
 import argparse
+import torch.nn as nn
+
 from Visualization import (
     IterationValues,
     SubFigure,
@@ -61,7 +63,6 @@ def run(cli_args):
     # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (
             torch.cuda.is_available() and gpu_count > 0) else "cpu")
-    device = "cpu"
 
     # Init different discriminators based on choice
     # Create an instance of discriminator and generator
@@ -76,8 +77,10 @@ def run(cli_args):
         generator = Generator(args.nz, args.ngf, args.channels,
                               args.layers).to(device)
 
-    print(generator)
-    print(discriminator)
+    if (device.type == 'cuda') and (gpu_count > 1):
+        discriminator = nn.DataParallel(discriminator, list(range(gpu_count)))
+        generator = nn.DataParallel(discriminator, list(range(gpu_count)))
+
     # Create an instance of the gan
     gan = dcgan(generator, discriminator, args.epochs, dataloader, model_name,
                 args.channels, device, args.gan,
