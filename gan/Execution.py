@@ -63,7 +63,6 @@ def run(cli_args):
     # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (
             torch.cuda.is_available() and gpu_count > 0) else "cpu")
-    device = "cpu"
 
     # Init different discriminators based on choice
     # Create an instance of discriminator and generator
