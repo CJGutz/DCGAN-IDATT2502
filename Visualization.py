@@ -55,7 +55,7 @@ def plot_iteration_values(
         graphs (SubFigure): SubFigure objects that contain the values
         and labels for the graphs
     """
-    _, axes = plt.subplots(len(graphs), figsize=(5*len(graphs), 5))
+    _, axes = plt.subplots(len(graphs), figsize=(5, 5*len(graphs)))
 
     plt.title(title)
     for count, sub_figure in enumerate(graphs):
