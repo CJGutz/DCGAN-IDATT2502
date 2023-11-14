@@ -136,6 +136,16 @@ class DCGAN:
                 # optimizes generator using BCELoss
                 self.optim_gen.step()
 
+                # save loss of both D(x) and G(x) and f1 score
+                # for further visualization
+                self.D_losses.append(netD_loss.item())
+                self.G_losses.append(netG_loss.item())
+
+                self.f1_scores.append(self.discriminator.calc_f1_score(
+                    netD_predictions_real, netD_predictions_fake,
+                    labels_real, labels_fake
+                ))
+
                 # Print and save losses and generated images
                 if i % 50 == 0:
                     print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f'
@@ -154,35 +164,27 @@ class DCGAN:
                         fake_samples, use_torch=True)
                     self.inception_scores_mean.append(IS)
                     self.inception_scores_std.append(IS_std)
-                    get_fid(fake_samples, real_samples)
 
-                # save loss of both D(x) and G(x) and f1 score
-                # for further visualization
-                self.D_losses.append(netD_loss.item())
-                self.G_losses.append(netG_loss.item())
+                    # plots data for analyzing runs. Added to store data regardless if idun terminates the code
+                    # tries low_value to see the low scores with more details
+                    plot_iteration_values(
+                        SubFigure("Loss", [IterationValues("G(x)", self.G_losses),
+                                           IterationValues("D(x)", self.D_losses)], 10),
+                        SubFigure("F1 score", [IterationValues(
+                            "D(x) F1", self.f1_scores)]),
+                        title=f"Loss < 5 and F1 score for epoch{epoch}-{self.num_epochs}-itr{(i + 1) // nth_iteration}",
+                        file_name=f"fig-low_value-f1-loss.png")
 
-                self.f1_scores.append(self.discriminator.calc_f1_score(
-                    netD_predictions_real, netD_predictions_fake,
-                    labels_real, labels_fake
-                ))
+                    plot_iteration_values(
+                        SubFigure("Loss", [IterationValues("G(x)", self.G_losses),
+                                           IterationValues("D(x)", self.D_losses)]),
+                        SubFigure("F1 score", [IterationValues(
+                            "D(x) F1", self.f1_scores)]),
+                        title=f"Loss and F1 score for epoch{epoch}-{self.num_epochs}-itr{(i + 1) // nth_iteration}",
+                        file_name=f"fig-last-iteration-f1-loss.png")
 
-                # plots data for analyzing runs. Added to store data regardless if idun terminates the code
-                # tries low_value to see the low scores with more details
-                plot_iteration_values(
-                    SubFigure("Loss", [IterationValues("G(x)", self.G_losses),
-                                       IterationValues("D(x)", self.D_losses)], 10),
-                    SubFigure("F1 score", [IterationValues("D(x) F1", self.f1_scores)]),
-                    title=f"Loss < 5 and F1 score for epoch{epoch}-{self.num_epochs}-itr{(i + 1) // nth_iteration}",
-                    file_name=f"fig-low_value-f1-loss.png")
-
-                plot_iteration_values(
-                    SubFigure("Loss", [IterationValues("G(x)", self.G_losses),
-                                       IterationValues("D(x)", self.D_losses)]),
-                    SubFigure("F1 score", [IterationValues("D(x) F1", self.f1_scores)]),
-                    title=f"Loss and F1 score for epoch{epoch}-{self.num_epochs}-itr{(i + 1) // nth_iteration}",
-                    file_name=f"fig-last-iteration-f1-loss.png")
-            if self.model_save:
-                self.save_model()
+                    if self.model_save:
+                        self.save_model()
 
     def save_iteration_images(self, fixed_noise, epoch, iteration, nth_iteration):
         with torch.no_grad():
