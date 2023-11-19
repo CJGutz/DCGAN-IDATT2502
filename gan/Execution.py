@@ -2,7 +2,7 @@ import torch
 import sys
 import signal
 import argparse
-import torch.nn as nn
+from torch import nn
 
 from Visualization import (
     IterationValues,
@@ -96,6 +96,9 @@ def run(cli_args):
             SubFigure("Loss", [IterationValues("G(x)", gan.G_losses),
                                IterationValues("D(x)", gan.D_losses)]),
             SubFigure("F1 score", [IterationValues("D(x) F1", gan.f1_scores)]),
+            SubFigure("Inception score", [
+                IterationValues("Mean", gan.inception_scores_mean),
+                IterationValues("Std", gan.inception_scores_std)]),
             title="Loss and F1 score",
             file_name=f"{model_name}-f1-loss.png")
         sys.exit(0)
