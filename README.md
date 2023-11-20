@@ -30,15 +30,29 @@ In this project, we explore various applications and metrics for **Generative Ad
     pip install -r requirements.txt
     ```
 
-3. To train a DCGAN model with default values:
-    ```console
-    python3 Entrypoint.py dcgan MNIST --channels 1
-    ```
+3. Add necessary folders 
+   <br><br>
+   The structure beneath should be followed for the different datasets
+   ```plaintext
+    DCGAB-IDATT2502
+   ├── datasets
+   │   ├── figures
+   │   └── model
 
-    To save and load models:
+4. To train a DCGAN model with default values:
+   ```console
+      python3 Entrypoint.py dcgan MNIST --channels 1
+   ```
+   
+   Models are saved automatically(if you don't want to save the models use no-model-save):
+   ```console
+    python3 Entrypoint.py dcgan MNIST --channels 1 --no-model-save
+   ```
+   
+   To load models use:
     ```console
-    python3 Entrypoint.py dcgan MNIST --channels 1 --load-model --save-model
-    ```
+    python3 Entrypoint.py dcgan MNIST --channels 1 --load-model
+   ```
 
 ## Datasets
 
@@ -69,5 +83,13 @@ If the celeba dataset is to be used follow the steps beneath
     <br>
 
 2. Place the zipfile into your dataset folder or directory
+      The structure beneath should be followed for the different datasets
+   ```plaintext
+    DCGAB-IDATT2502
+   ├── datasets
+   │   ├── figures
+   │   ├── model
+   │   └── celeba.zip
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
