@@ -1,6 +1,6 @@
-# Deep Convolutional GAN (DCGAN)
-
 <a name="readme-top"></a>
+
+# Deep Convolutional GAN (DCGAN)
 
 This project is part of the course *IDATT2502 - Applied Machine Learning* at the Norwegian University of Science and Technology (NTNU) by:
 
