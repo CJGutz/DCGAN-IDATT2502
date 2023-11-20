@@ -6,6 +6,10 @@ import numpy as np
 import torchvision.utils as vutils
 
 
+def moving_average(values, window_size):
+    return np.convolve(np.array(values), np.ones(window_size), 'valid') / window_size
+
+
 def print_start_img(dataloader, grid_imgs=(8, 5), title="Starting Images"):
     image_batch = next(iter(dataloader))
     plt.figure(figsize=(5, 5))
@@ -62,8 +66,9 @@ def plot_iteration_values(
         ax = axes[count]
         if sub_figure.ylim:
             ax.set_ylim([None, sub_figure.ylim])
-        for plots in sub_figure.values_labels:
-            ax.plot(plots.values, label=plots.label)
+        for plot in sub_figure.values_labels:
+            values = moving_average(plot.values, 50)
+            ax.plot(values, label=plot.label)
         ax.set_xlabel("Iterations")
         ax.set_ylabel(sub_figure.y_label)
         ax.grid()
