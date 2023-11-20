@@ -1,37 +1,73 @@
-# Deep Convolutional GAN
-This is a project in the course *IDATT2502 - Applied Machine Learning* at the Norwegian University of Science and Technology (NTNU) by:
-- Carl Johan Gützkow
-- Eirik Elvestad
-- Tomas Beranek
-  
-In this project we have developed a **Deep Convolutional Generative Adversarial Network**.
+# Deep Convolutional GAN (DCGAN)
 
-# How to
+<a name="readme-top"></a>
 
-```console
-   pip install -r requirements.txt
-```
+This project is part of the course *IDATT2502 - Applied Machine Learning* at the Norwegian University of Science and Technology (NTNU) by:
 
-To train a DCGAN model with the given default values you run.
-```console
-   python3 Entrypoint.py dcgan MNIST --channels 1
-```
-It is also possible to train other models.
-Find available models in [Entrypoint.py](./Entrypoint.py)
+- Carl Johan Gützkow - [GitHub](https://github.com/CJGutz)
+- Eirik Elvestad - [GitHub](https://github.com/eirikelv)
+- Tomas Beranek - [GitHub](https://github.com/tomasbera)
 
-Remember to save and load models if you want to persist your training.
-The models will be saved even if an error occurrs in the training or if you shut the training down yourself.
-```console
-   python3 Entrypoint.py dcgan MNIST --channels 1 --load-model --save-model
-```
+## Overview
+
+In this project, we explore various applications and metrics for **Generative Adversary Networks**.
+
+## Installation and Execution
+
+1. Clone the repository:
+    ```console
+    git clone https://github.com/CJGutz/DCGAN-IDATT2502.git
+    ```
+
+    OR
+
+    ```console
+    git clone git@github.com:CJGutz/DCGAN-IDATT2502.git
+    ```
+
+2. Download the required packages:
+    ```console
+    pip install -r requirements.txt
+    ```
+
+3. To train a DCGAN model with default values:
+    ```console
+    python3 Entrypoint.py dcgan MNIST --channels 1
+    ```
+
+    To save and load models:
+    ```console
+    python3 Entrypoint.py dcgan MNIST --channels 1 --load-model --save-model
+    ```
 
 ## Datasets
 
-Set your preferred dataset directory or zip path as the argument to use it.
-If you want to use a dataset from torchvision, you can see the [DatasetLoader.py](./DatasetLoader.py) file
-for a list of supported datasets. Just use the name of the dataset as the argument.
+Specify your preferred dataset directory or zip path as an argument to use it. For torchvision datasets, refer to [DatasetLoader.py](./DatasetLoader.py) for supported datasets.
 
-Example Script: 
+### Example Script:
+
 ```console
 python3 Entrypoint.py dcgan datasets/celeba-dataset -c 3 -i 64 -l 3 -b 128 -e 5 -lr 0.0002 -b1 0.5 --ndf 64 --ngf 64 --nz 100
 ```
+
+### Tested Datasets
+These datasets are already a part of the program and can be directly accessed from the command line using the specific 
+titles listed in the table below.
+
+| Datasets       | Description                                             |
+|----------------|---------------------------------------------------------|
+| MNIST          | Handwritten digits (0-9) in 28x28 grayscale images      |
+| celeba-dataset | 200,000+ celebrity images with 40 attribute labels each |
+| FashionMNIST   | 28x28 grayscale images of 10 fashion categories         |
+| CIFAR10        | 60,000 32x32 color images across 10 classes             |
+
+<br>
+If the celeba dataset is to be used follow the steps beneath
+
+1. Download the zipfile from "https://drive.google.com/drive/folders/0B7EVK8r0v71pTUZsaXdaSnZBZzg?resourcekey=0-rJlzl934LzC-Xp28GeIBzQ"
+
+    <br>
+
+2. Place the zipfile into your dataset folder or directory
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
