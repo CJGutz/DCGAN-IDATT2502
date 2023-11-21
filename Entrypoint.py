@@ -1,9 +1,10 @@
-from gan.Execution import run as run_dcgan
+from gan.Execution import run_dcgan, run_lsgan
 import sys
 
 
 MODELS = {
-    "gan": run_dcgan
+    "dcgan": run_dcgan,
+    "lsgan": run_lsgan
 }
 
 
