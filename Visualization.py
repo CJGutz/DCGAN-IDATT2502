@@ -50,7 +50,7 @@ class SubFigure:
     ylim: int = None
 
 
-WINDOW_SIZE = 50
+WINDOW_SIZE = 200
 
 
 def plot_iteration_values(
