@@ -172,7 +172,7 @@ class DCGAN:
                                            IterationValues("D(x)", self.D_losses)], 10),
                         SubFigure("F1 score", [IterationValues(
                             "D(x) F1", self.f1_scores)]),
-                        title=f"Loss < 5 and F1 score for epoch{epoch}-{self.num_epochs}-itr{(i + 1) // nth_iteration}",
+                        title=f"Loss < 10 and F1 score for epoch{epoch}-{self.num_epochs}-itr{(i + 1) // nth_iteration}",
                         file_name=f"fig-low_value-f1-loss.png")
 
                     plot_iteration_values(
