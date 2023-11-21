@@ -94,15 +94,7 @@ def run(model: str, cli_args):
             print(f"Saving model {model_name}")
             gan.save_model()
             print("Model saved")
-        plot_iteration_values(
-            SubFigure("Loss", [IterationValues("G(x)", gan.G_losses),
-                               IterationValues("D(x)", gan.D_losses)]),
-            SubFigure("F1 score", [IterationValues("D(x) F1", gan.f1_scores)]),
-            SubFigure("Inception score", [
-                IterationValues("Mean", gan.inception_scores_mean),
-                IterationValues("Std", gan.inception_scores_std)]),
-            title="Loss and F1 score",
-            file_name=f"{model_name}-f1-loss.png")
+        gan.plot_charts_for_gan(args.epochs)
         sys.exit(0)
 
     signal.signal(signal.SIGINT, tear_down)

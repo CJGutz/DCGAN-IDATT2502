@@ -61,6 +61,8 @@ class DCGAN:
         self.G_accuracies = []
         self.D_accuracies = []
         self.f1_scores = []
+        self.recall = []
+        self.precision = []
         self.img_list = []
         self.inception_scores_mean = []
         self.inception_scores_std = []
@@ -90,6 +92,7 @@ class DCGAN:
     def train(self):
         (fixed_noise, numb_episodes,
          criterion) = self.pre_training()
+        nth_iteration = len(self.dataloader) // 3
 
         for epoch in range(1, self.num_epochs + 1):
             for i, data_batch in enumerate(self.dataloader, 0):
@@ -141,10 +144,13 @@ class DCGAN:
                 self.D_losses.append(netD_loss.item())
                 self.G_losses.append(netG_loss.item())
 
-                self.f1_scores.append(self.discriminator.calc_f1_score(
+                f1, precision, recall = self.discriminator.calc_f1_score(
                     netD_predictions_real, netD_predictions_fake,
                     labels_real, labels_fake
-                ))
+                )
+                self.f1_scores.append(f1)
+                self.precision.append(precision)
+                self.recall.append(recall)
 
                 # Print and save losses and generated images
                 if i % 50 == 0:
@@ -153,7 +159,6 @@ class DCGAN:
                              netD_loss.item(), netG_loss.item()))
 
                 # if statement used for printing images
-                nth_iteration = len(self.dataloader) // 3
                 if ((i + 1) % nth_iteration == 0) or (
                         (epoch == self.num_epochs) and (i == len(self.dataloader) - 1)):
                     self.save_iteration_images(
@@ -165,23 +170,7 @@ class DCGAN:
                     self.inception_scores_mean.append(IS)
                     self.inception_scores_std.append(IS_std)
 
-                    # plots data for analyzing runs. Added to store data regardless if idun terminates the code
-                    # tries low_value to see the low scores with more details
-                    plot_iteration_values(
-                        SubFigure("Loss", [IterationValues("G(x)", self.G_losses),
-                                           IterationValues("D(x)", self.D_losses)], 10),
-                        SubFigure("F1 score", [IterationValues(
-                            "D(x) F1", self.f1_scores)]),
-                        title=f"Loss < 10 and F1 score for epoch{epoch}-{self.num_epochs}-itr{(i + 1) // nth_iteration}",
-                        file_name=f"fig-low_value-f1-loss.png")
-
-                    plot_iteration_values(
-                        SubFigure("Loss", [IterationValues("G(x)", self.G_losses),
-                                           IterationValues("D(x)", self.D_losses)]),
-                        SubFigure("F1 score", [IterationValues(
-                            "D(x) F1", self.f1_scores)]),
-                        title=f"Loss and F1 score for epoch{epoch}-{self.num_epochs}-itr{(i + 1) // nth_iteration}",
-                        file_name=f"fig-last-iteration-f1-loss.png")
+                    self.plot_charts_for_gan(epoch, i, nth_iteration)
 
                     if self.model_save:
                         self.save_model()
@@ -199,6 +188,39 @@ class DCGAN:
                                f"fig-epoch{epoch}-{self.num_epochs}"
                                f"-itr{(iteration + 1) // nth_iteration}"
                                f"-{len(self.dataloader) // nth_iteration}.png")
+
+    def plot_charts_for_gan(self, epoch):
+        """plots data for analyzing runs. Added to store data
+        regardless if idun terminates the code
+        tries low_value to see the low scores with more details"""
+
+        loss = SubFigure("Loss", [IterationValues("G(x)", self.G_losses),
+                                  IterationValues("D(x)", self.D_losses)])
+        loss_clipped = loss
+        loss_clipped.ylim = 10
+        f1_prec_recall_figure = SubFigure(
+            "F1, precision and recall for discriminator",
+            [IterationValues("F1", self.f1_scores),
+             IterationValues("Precision", self.precision),
+             IterationValues("Recall", self.recall)])
+        incept_score = SubFigure("Inception Score", [IterationValues(
+            "Inception Score", self.inception_scores_mean),
+            IterationValues("Inception Score std", self.inception_scores_std)
+        ])
+
+        plot_iteration_values(
+            loss_clipped,
+            f1_prec_recall_figure,
+            incept_score,
+            title=f"Clipped loss, F1 score, and inception for epoch {epoch}-{self.num_epochs}",
+            file_name="fig-loss-f1-inception-clipped.png")
+
+        plot_iteration_values(
+            loss,
+            f1_prec_recall_figure,
+            incept_score,
+            title=f"Loss and F1 score for epoch{epoch}-{self.num_epochs}",
+            file_name="fig-loss-f1-inception.png")
 
     def save_model(self):
         PATH = os.path.join("datasets", "model", self.model_name + ".pt")

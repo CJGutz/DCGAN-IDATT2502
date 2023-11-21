@@ -1,3 +1,4 @@
+from typing import Tuple
 import torch.nn as nn
 import torch
 from torch import Tensor
@@ -33,7 +34,8 @@ class lsDiscriminator(nn.Module):
 
     def stand_layer(self, in_dim, out_dim, kernel_size, stride, padding):
         return nn.Sequential(
-            nn.Conv2d(in_dim, out_dim, kernel_size, stride=stride, padding=padding, bias=False),
+            nn.Conv2d(in_dim, out_dim, kernel_size,
+                      stride=stride, padding=padding, bias=False),
             nn.BatchNorm2d(out_dim),
             nn.LeakyReLU(0.2)
         )
@@ -57,10 +59,12 @@ class lsDiscriminator(nn.Module):
                       preds_fake: Tensor,
                       real_labels: Tensor,
                       fake_labels: Tensor
-                      ) -> float:
+                      ) -> Tuple[float, float, float]:
+        """Returns f1 score, precision, and recall"""
+
         true_positive = self.times_correct(preds_real, real_labels)
         false_positive = self.times_correct(preds_real, fake_labels)
         false_negative = self.times_correct(preds_fake, real_labels)
         precision = self.calc_precision(true_positive, false_positive)
         recall = self.calc_recall(true_positive, false_negative)
-        return 2 * ((precision * recall) / max(precision + recall, ZERO_SUBSTITUTE))
+        return 2 * ((precision * recall) / max(precision + recall, ZERO_SUBSTITUTE)), precision, recall
