@@ -170,7 +170,7 @@ class DCGAN:
                     self.inception_scores_mean.append(IS)
                     self.inception_scores_std.append(IS_std)
 
-                    self.plot_charts_for_gan(epoch, i, nth_iteration)
+                    self.plot_charts_for_gan(epoch)
 
                     if self.model_save:
                         self.save_model()
