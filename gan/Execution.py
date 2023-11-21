@@ -10,7 +10,7 @@ from Visualization import (
     print_start_img,
     plot_iteration_values
 )
-from gan.GAN import DCGAN as dcgan
+from gan.GAN import DCGAN as dcgan, GAN
 from gan.dcgan.Discriminator import Discriminator
 from gan.lsgan.lsDiscriminator import lsDiscriminator
 from gan.dcgan.Generator import Generator
@@ -18,17 +18,19 @@ from gan.lsgan.lsGenerator import lsGenerator
 from DatasetLoader import data_loader
 
 
-class GAN:
-    LSGAN = "lsgan"
-    DCGAN = "dcgan"
+def run_dcgan(cli_args):
+    run(GAN.DCGAN, cli_args)
 
 
-def run(cli_args):
+def run_lsgan(cli_args):
+    run(GAN.LSGAN, cli_args)
+
+
+def run(model: str, cli_args):
     parser = argparse.ArgumentParser(
         prog="DCGAN implementation",
     )
     parser.add_argument("dataset", type=str)
-    parser.add_argument("-g", "--gan", type=str, required=True)
     parser.add_argument("-c", "--channels", required=True,
                         type=int, choices=[1, 3])
     parser.add_argument("-i", "--img-size", default=64, type=int)
@@ -62,11 +64,11 @@ def run(cli_args):
 
     # Device is based on CUDA available gpu
     device = torch.device("cuda:0" if (
-            torch.cuda.is_available() and gpu_count > 0) else "cpu")
+        torch.cuda.is_available() and gpu_count > 0) else "cpu")
 
     # Init different discriminators based on choice
     # Create an instance of discriminator and generator
-    if args.gan == GAN.LSGAN:
+    if model == GAN.LSGAN:
         discriminator = lsDiscriminator(
             args.channels, args.ndf).to(device)
         generator = lsGenerator(
@@ -83,7 +85,7 @@ def run(cli_args):
 
     # Create an instance of the gan
     gan = dcgan(generator, discriminator, args.epochs, dataloader, model_name,
-                args.channels, device, args.gan,
+                args.channels, device, model,
                 args.batch_size, args.learning_rate, args.beta1,
                 args.nz, args.load_model, not args.no_model_save)
 
